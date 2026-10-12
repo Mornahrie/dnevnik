@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мой дневник</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <h4>Отметки</h4>
+        <a href="#" class="active">Мой дневник</a>
+        <a href="#">Домашние задания</a>
+        <a href="#">Посещаемость</a>
+        <a href="#">Расписание</a>
+        <a href="#">Аналитика</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="title">Дневник учащегося</div>
+            <div class="user-info">
+                <span id="userInfo">Иванов И.И. / 9А класс</span>
+                <button class="btn-logout" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <h2>Мой дневник</h2>
+
+            <div class="filters">
+                <select>
+                    <option>Период: сентябрь 2026</option>
+                    <option>Период: октябрь 2026</option>
+                    <option>Период: ноябрь 2026</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Предмет</th>
+                            <th>Даты</th>
+                            <th>Оценки</th>
+                            <th>Средний</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Математика</td>
+                            <td>05.09, 12.09, 19.09</td>
+                            <td>9, 8, 7</td>
+                            <td>8.0</td>
+                        </tr>
+                        <tr>
+                            <td>Физика</td>
+                            <td>06.09, 13.09, 20.09</td>
+                            <td>7, 8, 8</td>
+                            <td>7.7</td>
+                        </tr>
+                        <tr>
+                            <td>Русский язык</td>
+                            <td>07.09, 14.09, 21.09</td>
+                            <td>8, 9, 9</td>
+                            <td>8.7</td>
+                        </tr>
+                        <tr>
+                            <td>История</td>
+                            <td>08.09, 15.09, 22.09</td>
+                            <td>6, 7, 8</td>
+                            <td>7.0</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="3">Общий средний балл за период:</td>
+                            <td>7.85</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/index.html';
+
+    const userName = localStorage.getItem('userName');
+    if (userName) document.getElementById('userInfo').textContent = userName + ' / 9А класс';
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/index.html';
+    }
+    </script>
+</body>
+</html>

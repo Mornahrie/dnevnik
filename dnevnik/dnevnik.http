@@ -1,0 +1,6 @@
+@dnevnik_HostAddress = http://localhost:5011
+
+GET {{dnevnik_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

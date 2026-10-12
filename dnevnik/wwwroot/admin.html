@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель администратора</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <h4>Пользователи</h4>
+        <a href="#">Справочники</a>
+        <a href="#">Сайт</a>
+        <a href="#">Расписание</a>
+        <a href="#">Аналитика</a>
+        <a href="#">Профиль</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="title">Дневник учащегося</div>
+            <div class="user-info">
+                <span id="userInfo">Ковалёв А.И. / Администратор</span>
+                <button class="btn-logout" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <h2>Панель администратора</h2>
+
+            <div class="stats-grid">
+                <div class="stat-card green">
+                    <h3>Пользователей</h3>
+                    <p>345</p>
+                </div>
+                <div class="stat-card blue">
+                    <h3>Классов</h3>
+                    <p>12</p>
+                </div>
+                <div class="stat-card yellow">
+                    <h3>Учеников</h3>
+                    <p>210</p>
+                </div>
+                <div class="stat-card red">
+                    <h3>Учителей</h3>
+                    <p>23</p>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-box">Средний балл по классам (столбчатая диаграмма)</div>
+                <div class="chart-box">Посещаемость по школе (круговая диаграмма)</div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2">Последние действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1. Создан пользователь — [Петров П.П.]</td><td>10:45</td></tr>
+                        <tr><td>2. Внесено расписание — [9А класс]</td><td>10:30</td></tr>
+                        <tr><td>3. Обновлены оценки — [Сидорова А.А.]</td><td>09:55</td></tr>
+                        <tr><td>4. Выставлены оценки — [10Б класс]</td><td>09:20</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/index.html';
+    }
+
+    const userName = localStorage.getItem('userName');
+    if (userName) {
+        document.getElementById('userInfo').textContent = userName + ' / Администратор';
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/index.html';
+    }
+    </script>
+</body>
+</html>

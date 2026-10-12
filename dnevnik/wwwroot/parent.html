@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Аналитика успеваемости</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <h4>Отметки</h4>
+        <a href="#">Домашние задания</a>
+        <a href="#">Посещаемость</a>
+        <a href="#">Расписание</a>
+        <a href="#" class="active">Аналитика</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="title">Дневник учащегося</div>
+            <div class="user-info">
+                <span id="userInfo">Иванов А.Г. / Родитель</span>
+                <button class="btn-logout" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <h2>Аналитика успеваемости</h2>
+
+            <div class="filters">
+                <select>
+                    <option>Ребенок: Иванов И.И., 9А</option>
+                    <option>Ребенок: Иванова М.И., 5Б</option>
+                </select>
+                <select>
+                    <option>Период: сентябрь 2026</option>
+                    <option>Период: октябрь 2026</option>
+                </select>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card green">
+                    <h3>Средний балл</h3>
+                    <p>7.85</p>
+                </div>
+                <div class="stat-card blue">
+                    <h3>Посещаемость</h3>
+                    <p>95%</p>
+                </div>
+                <div class="stat-card yellow">
+                    <h3>Выполнение ДЗ</h3>
+                    <p>88%</p>
+                </div>
+                <div class="stat-card red">
+                    <h3>Отклонение от класса</h3>
+                    <p>+0.4</p>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-box">Динамика успеваемости (линейный график)</div>
+                <div class="chart-box">Распределение оценок (круговая диаграмма)</div>
+            </div>
+
+            <div class="notifications-box">
+                <h3>Уведомления</h3>
+                <ul>
+                    <li>⚠ Новая оценка по истории: 8 (15.09.2026)</li>
+                    <li>⚠ Пропуск занятия по физике: н/б (13.09.2026)</li>
+                    <li>⚠ Не сдано домашнее задание по математике (12.09.2026)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/index.html';
+
+    const userName = localStorage.getItem('userName');
+    if (userName) document.getElementById('userInfo').textContent = userName + ' / Родитель';
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/index.html';
+    }
+    </script>
+</body>
+</html>

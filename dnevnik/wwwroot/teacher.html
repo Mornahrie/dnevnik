@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Выставление отметок</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <h4>Мои классы</h4>
+        <a href="#" class="active">Оценки</a>
+        <a href="#">Посещаемость</a>
+        <a href="#">Домашние задания</a>
+        <a href="#">Аналитика</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="title">Дневник учащегося</div>
+            <div class="user-info">
+                <span id="userInfo">Ковалёв Д.Д. / Учитель</span>
+                <button class="btn-logout" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <h2>Выставление отметок</h2>
+
+            <div class="filters">
+                <select>
+                    <option>Класс: 9А</option>
+                    <option>Класс: 10Б</option>
+                    <option>Класс: 11А</option>
+                </select>
+                <select>
+                    <option>Предмет: Математика</option>
+                    <option>Предмет: Физика</option>
+                    <option>Предмет: История</option>
+                </select>
+                <input type="date" value="2026-09-15">
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ученик</th>
+                            <th>Оценка</th>
+                            <th>Тип работы</th>
+                            <th>Комментарий</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Анисимов Артём</td>
+                            <td><input type="number" class="grade-input" value="5" min="1" max="10"></td>
+                            <td>Контрольная работа</td>
+                            <td>Отличная работа</td>
+                        </tr>
+                        <tr>
+                            <td>Бондаренко Елена</td>
+                            <td><input type="number" class="grade-input" value="4" min="1" max="10"></td>
+                            <td>Контрольная работа</td>
+                            <td>Хорошо, но есть ошибки в вычислениях</td>
+                        </tr>
+                        <tr>
+                            <td>Власов Дмитрий</td>
+                            <td><input type="number" class="grade-input" value="3" min="1" max="10"></td>
+                            <td>Контрольная работа</td>
+                            <td>Нужно повторить правила</td>
+                        </tr>
+                        <tr>
+                            <td>Иванов Максим</td>
+                            <td><input type="number" class="grade-input" value="5" min="1" max="10"></td>
+                            <td>Контрольная работа</td>
+                            <td>Молодец!</td>
+                        </tr>
+                        <tr>
+                            <td>Сидорова Анна</td>
+                            <td><input type="number" class="grade-input" value="3" min="1" max="10"></td>
+                            <td>Контрольная работа</td>
+                            <td>Работу не сдала</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <button class="btn-save">Сохранить оценки</button>
+        </div>
+    </div>
+
+    <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/index.html';
+
+    const userName = localStorage.getItem('userName');
+    if (userName) document.getElementById('userInfo').textContent = userName + ' / Учитель';
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/index.html';
+    }
+    </script>
+</body>
+</html>
