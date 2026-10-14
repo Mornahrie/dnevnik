@@ -1,5 +1,4 @@
-﻿using dnevnik.Entities;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace dnevnik.Entities;
@@ -10,6 +9,10 @@ public class Schedule
     [Key]
     [Column("id")]
     public int Id { get; set; }
+
+    [Column("quarter_id")]
+    public int QuarterId { get; set; }
+    public Quarter Quarter { get; set; } = null!;
 
     [Column("class_id")]
     public int? ClassId { get; set; }

@@ -4,94 +4,474 @@
     <meta charset="UTF-8">
     <title>Мой дневник</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .week-nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+            .week-nav button {
+                padding: 6px 14px;
+                border-radius: 8px;
+                border: 1px solid #d6dee8;
+                background: #fff;
+                cursor: pointer;
+            }
+
+            .week-nav .range {
+                font-weight: 600;
+                color: #334;
+                min-width: 180px;
+                text-align: center;
+            }
+
+        .diary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .diary-page {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .diary-day {
+            display: flex;
+            border: 1px solid #c8d4e0;
+            border-radius: 8px;
+            background: #fff;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,.04);
+        }
+
+        .day-label {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            background: linear-gradient(180deg,#eef3fa,#dfe8f3);
+            padding: 8px 4px;
+            font-weight: 700;
+            font-size: 12px;
+            color: #2b3a55;
+            border-right: 1px solid #c8d4e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 30px;
+            white-space: nowrap;
+            letter-spacing: 1px;
+        }
+
+        .lesson-rows {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .lesson-row {
+            display: grid;
+            grid-template-columns: 22px 1.3fr 1.5fr 55px 55px;
+            border-bottom: 1px dashed #eef2f7;
+            min-height: 34px;
+            font-size: 11px;
+        }
+
+            .lesson-row:last-child {
+                border-bottom: none;
+            }
+
+            .lesson-row .num {
+                background: #f6f9ff;
+                border-right: 1px solid #eef2f7;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #7c8798;
+                font-weight: 600;
+                font-size: 10px;
+            }
+
+            .lesson-row .cell {
+                padding: 3px 5px;
+                border-right: 1px solid #eef2f7;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                overflow: hidden;
+                min-width: 0;
+            }
+
+                .lesson-row .cell:last-child {
+                    border-right: none;
+                }
+
+            .lesson-row .subject {
+                font-weight: 600;
+                color: #1c2b46;
+                font-size: 11px;
+                line-height: 1.15;
+            }
+
+            .lesson-row .teacher {
+                color: #7c8798;
+                font-size: 9px;
+                line-height: 1.15;
+                margin-top: 1px;
+            }
+
+            .lesson-row .hw-text {
+                line-height: 1.15;
+                color: #334;
+                font-size: 10px;
+            }
+
+            .lesson-row .hw-status {
+                display: inline-block;
+                font-size: 9px;
+                padding: 1px 4px;
+                border-radius: 3px;
+                margin-top: 2px;
+                align-self: flex-start;
+            }
+
+        .hw-status.done {
+            background: #e6f4ea;
+            color: #137a3d;
+        }
+
+        .hw-status.not-done {
+            background: #fdecee;
+            color: #b02a37;
+        }
+
+        .hw-status.pending {
+            background: #fff4d6;
+            color: #a06b00;
+        }
+
+        .grade-badge {
+            display: inline-block;
+            background: #e6f4ea;
+            color: #137a3d;
+            font-weight: 700;
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 11px;
+            margin-right: 2px;
+        }
+
+            .grade-badge.bad {
+                background: #fdecee;
+                color: #b02a37;
+            }
+
+        .att-badge {
+            display: inline-block;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 10px;
+            background: #eef3ff;
+            color: #2a5bd7;
+            align-self: flex-start;
+        }
+
+            .att-badge.absent {
+                background: #fdecee;
+                color: #c0392b;
+                font-weight: 600;
+            }
+
+        @media (max-width: 900px) {
+            .diary {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <h4>Отметки</h4>
-        <a href="#" class="active">Мой дневник</a>
-        <a href="#">Домашние задания</a>
-        <a href="#">Посещаемость</a>
-        <a href="#">Расписание</a>
-        <a href="#">Аналитика</a>
+        <div class="brand"><div class="brand-logo">Д</div><div class="brand-text">Дневник</div></div>
+        <h4>Меню</h4>
+        <a href="#" class="active" data-tab="week"><span class="icon">🗓️</span><span>Дневник</span></a>
+        <a href="#" data-tab="grades"><span class="icon">📝</span><span>Оценки</span></a>
+        <a href="#" data-tab="homework"><span class="icon">📖</span><span>Домашние задания</span></a>
+        <a href="#" data-tab="attendance"><span class="icon">✅</span><span>Посещаемость</span></a>
+        <a href="#" data-tab="analytics"><span class="icon">📈</span><span>Аналитика</span></a>
     </div>
 
     <div class="main-content">
         <div class="header">
-            <div class="title">Дневник учащегося</div>
+            <div class="title" id="pageTitle">Дневник</div>
             <div class="user-info">
-                <span id="userInfo">Иванов И.И. / 9А класс</span>
+                <div class="user-badge">
+                    <div class="user-avatar" id="userAvatar">У</div>
+                    <div class="user-meta">
+                        <span class="name" id="userInfo">Ученик</span>
+                        <span class="role" id="userClass">—</span>
+                    </div>
+                </div>
                 <button class="btn-logout" onclick="logout()">Выйти</button>
             </div>
         </div>
 
         <div class="content-body">
-            <h2>Мой дневник</h2>
-
-            <div class="filters">
-                <select>
-                    <option>Период: сентябрь 2026</option>
-                    <option>Период: октябрь 2026</option>
-                    <option>Период: ноябрь 2026</option>
-                </select>
+            <div class="tab-panel active" data-panel="week">
+                <h2>Дневник на неделю</h2>
+                <div class="week-nav">
+                    <button onclick="shiftWeek(-1)">← Предыдущая</button>
+                    <span class="range" id="weekRange">—</span>
+                    <button onclick="shiftWeek(1)">Следующая →</button>
+                    <button onclick="goToday()">Текущая</button>
+                </div>
+                <div class="diary-wrap" id="diaryWrap"></div>
             </div>
 
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Предмет</th>
-                            <th>Даты</th>
-                            <th>Оценки</th>
-                            <th>Средний</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Математика</td>
-                            <td>05.09, 12.09, 19.09</td>
-                            <td>9, 8, 7</td>
-                            <td>8.0</td>
-                        </tr>
-                        <tr>
-                            <td>Физика</td>
-                            <td>06.09, 13.09, 20.09</td>
-                            <td>7, 8, 8</td>
-                            <td>7.7</td>
-                        </tr>
-                        <tr>
-                            <td>Русский язык</td>
-                            <td>07.09, 14.09, 21.09</td>
-                            <td>8, 9, 9</td>
-                            <td>8.7</td>
-                        </tr>
-                        <tr>
-                            <td>История</td>
-                            <td>08.09, 15.09, 22.09</td>
-                            <td>6, 7, 8</td>
-                            <td>7.0</td>
-                        </tr>
-                        <tr class="total-row">
-                            <td colspan="3">Общий средний балл за период:</td>
-                            <td>7.85</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="tab-panel" data-panel="grades">
+                <h2>Мои оценки</h2>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Дата</th><th>Предмет</th><th>Оценка</th><th>Тип</th><th>Комментарий</th></tr></thead>
+                        <tbody id="gradesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-panel" data-panel="homework">
+                <h2>Домашние задания</h2>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Предмет</th><th>Выдано</th><th>Срок</th><th>Описание</th><th>Статус</th></tr></thead>
+                        <tbody id="hwTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-panel" data-panel="attendance">
+                <h2>Посещаемость</h2>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Дата</th><th>Предмет</th><th>Статус</th><th>Комментарий</th></tr></thead>
+                        <tbody id="attTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-panel" data-panel="analytics">
+                <h2>Личная аналитика</h2>
+                <div class="stats-grid" id="anStats"></div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Предмет (ID)</th><th>Средний балл</th><th>Кол-во оценок</th></tr></thead>
+                        <tbody id="anTable"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
+    <div class="toast-container" id="toasts"></div>
+
     <script>
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = '/index.html';
+        const API = '/api/student';
+        function cleanToken(r) { return r ? String(r).replace(/^\uFEFF/, '').replace(/[\u200B-\u200D]/g, '').replace(/\s/g, '').trim() : ''; }
+        const token = cleanToken(localStorage.getItem('token'));
+        if (!token) { location.replace('/index.html'); throw new Error('No token'); }
+        const headers = { 'Authorization': 'Bearer ' + token };
+        const userName = localStorage.getItem('userName') || 'Ученик';
+        document.getElementById('userInfo').textContent = userName;
+        document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
 
-    const userName = localStorage.getItem('userName');
-    if (userName) document.getElementById('userInfo').textContent = userName + ' / 9А класс';
+        // Функция для получения первой учебной недели сентября 2026 года
+        function getInitialWeekStart() {
+            const targetDate = new Date(2026, 8, 1); // 1 сентября 2026 (месяцы с 0)
+            const dayOfWeek = targetDate.getDay();
+            // Если воскресенье (0), отнимаем 6 дней, иначе отнимаем (день недели - 1)
+            const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            targetDate.setDate(targetDate.getDate() + diff);
+            return targetDate;
+        }
 
-    function logout() {
-        localStorage.clear();
-        window.location.href = '/index.html';
-    }
+        let weekStart = getInitialWeekStart(), loggingOut = false;
+
+        async function api(path) {
+            const r = await fetch(API + path, { headers });
+            if (r.status === 401) { if (!loggingOut) { loggingOut = true; localStorage.clear(); location.replace('/index.html'); } throw new Error('Сессия истекла'); }
+            if (r.status === 403) throw new Error('Нет доступа');
+            if (!r.ok) throw new Error('Ошибка запроса');
+            return r.json();
+        }
+        function toast(m, t = 'success') { const e = document.createElement('div'); e.className = 'toast ' + t; e.textContent = m; document.getElementById('toasts').appendChild(e); setTimeout(() => e.remove(), 3500); }
+        function fmtDate(d) { return d ? new Date(d).toLocaleDateString('ru-RU') : '—'; }
+        function fmtShort(d) { return new Date(d).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }); }
+        function statusBadge(s) {
+            if (!s) return '<span class="badge gray">—</span>';
+            if (/выполн|done/i.test(s)) return `<span class="badge green">${s}</span>`;
+            if (/не сдан|просроч/i.test(s)) return `<span class="badge red">${s}</span>`;
+            return `<span class="badge yellow">${s}</span>`;
+        }
+
+        async function loadMe() {
+            try {
+                const me = await api('/me');
+                if (me.className) document.getElementById('userClass').textContent = me.className;
+            } catch (e) { }
+        }
+
+        async function loadWeek() {
+            const wrap = document.getElementById('diaryWrap');
+            wrap.innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка...</div>';
+            try {
+                const qs = weekStart ? '?startDate=' + weekStart.toISOString() : '';
+                const data = await api('/week' + qs);
+                if (data.startDate) weekStart = new Date(data.startDate);
+                renderWeekRange(data.days);
+                renderWeek(data.days);
+            } catch (e) { wrap.innerHTML = `<div>${e.message}</div>`; }
+        }
+
+        function renderWeekRange(days) {
+            if (!days || !days.length) { document.getElementById('weekRange').textContent = '—'; return; }
+            const a = new Date(days[0].date), b = new Date(days[days.length - 1].date);
+            document.getElementById('weekRange').textContent =
+                a.toLocaleDateString('ru-RU') + ' — ' + b.toLocaleDateString('ru-RU');
+        }
+
+        function renderWeek(days) {
+            const wrap = document.getElementById('diaryWrap');
+            if (!days || !days.length) { wrap.innerHTML = '<div class="empty-state">Нет расписания</div>'; return; }
+            const left = days.slice(0, 3);
+            const right = days.slice(3, 6);
+            wrap.innerHTML = `
+            <div class="diary">
+                <div class="diary-page">${left.map(renderDiaryDay).join('')}</div>
+                <div class="diary-page">${right.map(renderDiaryDay).join('')}</div>
+            </div>`;
+        }
+
+        function renderDiaryDay(day) {
+            const rows = [];
+            for (let i = 1; i <= 8; i++) {
+                const l = (day.lessons || []).find(x => x.lessonNumber === i);
+                if (l) {
+                    const gradeHtml = (l.grades && l.grades.length)
+                        ? l.grades.map(g => `<span class="grade-badge ${g.value <= 2 ? 'bad' : ''}">${g.value}</span>`).join(' ')
+                        : '';
+                    const attHtml = l.attendance
+                        ? `<span class="att-badge ${/отсут|^н$/i.test(l.attendance.status) ? 'absent' : ''}">${l.attendance.status}</span>`
+                        : '';
+                    let hwHtml = '';
+                    if (l.homework) {
+                        let cls = 'pending';
+                        if (/выполн|done/i.test(l.homework.status || '')) cls = 'done';
+                        else if (/не сдан|просроч/i.test(l.homework.status || '')) cls = 'not-done';
+                        hwHtml = `<div class="hw-text">${l.homework.description || ''}</div>`;
+                        if (l.homework.status) hwHtml += `<span class="hw-status ${cls}">${l.homework.status}</span>`;
+                    }
+
+                    rows.push(`<div class="lesson-row">
+                    <div class="num">${i}</div>
+                    <div class="cell">
+                        <div class="subject">${l.subjectName || '—'}</div>
+                        <div class="teacher">${l.teacherName || ''}</div>
+                    </div>
+                    <div class="cell">${hwHtml}</div>
+                    <div class="cell">${gradeHtml}</div>
+                    <div class="cell">${attHtml}</div>
+                </div>`);
+                } else {
+                    rows.push(`<div class="lesson-row">
+                    <div class="num">${i}</div>
+                    <div class="cell"></div><div class="cell"></div>
+                    <div class="cell"></div><div class="cell"></div>
+                </div>`);
+                }
+            }
+            return `<div class="diary-day">
+            <div class="day-label">${day.dayName} · ${fmtShort(day.date)}</div>
+            <div class="lesson-rows">${rows.join('')}</div>
+        </div>`;
+        }
+
+        function shiftWeek(delta) {
+            if (!weekStart) weekStart = new Date();
+            weekStart = new Date(weekStart.getTime() + delta * 7 * 86400000);
+            loadWeek();
+        }
+        function goToday() { weekStart = new Date(); loadWeek(); }
+
+        async function loadGrades() {
+            const tb = document.getElementById('gradesTable');
+            tb.innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div>Загрузка...</div></td></tr>';
+            try {
+                const items = await api('/grades');
+                tb.innerHTML = items.map(g => `<tr><td>${fmtDate(g.date)}</td><td>${g.subject?.name || '—'}</td>
+                <td><strong>${g.value}</strong></td><td>${g.type || '—'}</td><td>${g.comment || '—'}</td></tr>`).join('')
+                    || '<tr><td colspan="5"><div class="empty-state">Оценок нет</div></td></tr>';
+            } catch (e) { tb.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`; }
+        }
+        async function loadHomework() {
+            const tb = document.getElementById('hwTable');
+            tb.innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div>Загрузка...</div></td></tr>';
+            try {
+                const items = await api('/homework');
+                tb.innerHTML = items.map(h => `<tr><td>${h.subject}</td><td>${fmtDate(h.dateIssued)}</td>
+                <td>${fmtDate(h.dateDue)}</td><td>${h.description}</td><td>${statusBadge(h.status)}</td></tr>`).join('')
+                    || '<tr><td colspan="5"><div class="empty-state">Нет заданий</div></td></tr>';
+            } catch (e) { tb.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`; }
+        }
+        async function loadAttendance() {
+            const tb = document.getElementById('attTable');
+            tb.innerHTML = '<tr><td colspan="4"><div class="loading"><div class="spinner"></div>Загрузка...</div></td></tr>';
+            try {
+                const items = await api('/attendance');
+                tb.innerHTML = items.map(a => {
+                    const ok = a.status !== 'н' && a.status !== 'отсутствовал';
+                    return `<tr><td>${fmtDate(a.date)}</td><td>${a.subject?.name || '—'}</td>
+                    <td><span class="badge ${ok ? 'green' : 'red'}">${a.status}</span></td>
+                    <td>${a.comment || '—'}</td></tr>`;
+                }).join('') || '<tr><td colspan="4"><div class="empty-state">Записей нет</div></td></tr>';
+            } catch (e) { tb.innerHTML = `<tr><td colspan="4">${e.message}</td></tr>`; }
+        }
+        async function loadAnalytics() {
+            try {
+                const d = await api('/analytics');
+                document.getElementById('anStats').innerHTML = `
+                <div class="stat-card green"><h3>Средний балл</h3><p>${Number(d.averageGrade || 0).toFixed(2)}</p></div>
+                <div class="stat-card blue"><h3>Посещаемость</h3><p>${Number(d.attendanceRate || 0).toFixed(0)}%</p></div>
+                <div class="stat-card yellow"><h3>Выполнение ДЗ</h3><p>${d.homeworkTotal ? Math.round(d.homeworkDone / d.homeworkTotal * 100) : 0}%</p></div>
+                <div class="stat-card red"><h3>Пропусков</h3><p>${d.absences ?? 0}</p></div>`;
+                document.getElementById('anTable').innerHTML = (d.bySubject || []).map(s =>
+                    `<tr><td>Предмет #${s.subjectId}</td><td>${Number(s.average || 0).toFixed(2)}</td><td>${s.count ?? 0}</td></tr>`).join('')
+                    || '<tr><td colspan="3"><div class="empty-state">Нет данных</div></td></tr>';
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        document.querySelectorAll('.sidebar a[data-tab]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                document.querySelectorAll('.sidebar a').forEach(x => x.classList.remove('active'));
+                a.classList.add('active');
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                document.querySelector(`[data-panel="${a.dataset.tab}"]`).classList.add('active');
+                const t = a.dataset.tab;
+                document.getElementById('pageTitle').textContent = a.querySelector('span:not(.icon)').textContent;
+                if (t === 'week') loadWeek();
+                if (t === 'grades') loadGrades();
+                if (t === 'homework') loadHomework();
+                if (t === 'attendance') loadAttendance();
+                if (t === 'analytics') loadAnalytics();
+            });
+        });
+        function logout() { localStorage.clear(); location.replace('/index.html'); }
+
+        loadMe();
+        loadWeek();
     </script>
 </body>
 </html>
