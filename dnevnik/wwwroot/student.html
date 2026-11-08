@@ -2,206 +2,25 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мой дневник</title>
     <link rel="stylesheet" href="/css/styles.css">
-    <style>
-        .week-nav {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 14px;
-            flex-wrap: wrap;
-        }
-
-            .week-nav button {
-                padding: 6px 14px;
-                border-radius: 8px;
-                border: 1px solid #d6dee8;
-                background: #fff;
-                cursor: pointer;
-            }
-
-            .week-nav .range {
-                font-weight: 600;
-                color: #334;
-                min-width: 180px;
-                text-align: center;
-            }
-
-        .diary {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .diary-page {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .diary-day {
-            display: flex;
-            border: 1px solid #c8d4e0;
-            border-radius: 8px;
-            background: #fff;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,.04);
-        }
-
-        .day-label {
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            background: linear-gradient(180deg,#eef3fa,#dfe8f3);
-            padding: 8px 4px;
-            font-weight: 700;
-            font-size: 12px;
-            color: #2b3a55;
-            border-right: 1px solid #c8d4e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 30px;
-            white-space: nowrap;
-            letter-spacing: 1px;
-        }
-
-        .lesson-rows {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-
-        .lesson-row {
-            display: grid;
-            grid-template-columns: 22px 1.3fr 1.5fr 55px 55px;
-            border-bottom: 1px dashed #eef2f7;
-            min-height: 34px;
-            font-size: 11px;
-        }
-
-            .lesson-row:last-child {
-                border-bottom: none;
-            }
-
-            .lesson-row .num {
-                background: #f6f9ff;
-                border-right: 1px solid #eef2f7;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #7c8798;
-                font-weight: 600;
-                font-size: 10px;
-            }
-
-            .lesson-row .cell {
-                padding: 3px 5px;
-                border-right: 1px solid #eef2f7;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                overflow: hidden;
-                min-width: 0;
-            }
-
-                .lesson-row .cell:last-child {
-                    border-right: none;
-                }
-
-            .lesson-row .subject {
-                font-weight: 600;
-                color: #1c2b46;
-                font-size: 11px;
-                line-height: 1.15;
-            }
-
-            .lesson-row .teacher {
-                color: #7c8798;
-                font-size: 9px;
-                line-height: 1.15;
-                margin-top: 1px;
-            }
-
-            .lesson-row .hw-text {
-                line-height: 1.15;
-                color: #334;
-                font-size: 10px;
-            }
-
-            .lesson-row .hw-status {
-                display: inline-block;
-                font-size: 9px;
-                padding: 1px 4px;
-                border-radius: 3px;
-                margin-top: 2px;
-                align-self: flex-start;
-            }
-
-        .hw-status.done {
-            background: #e6f4ea;
-            color: #137a3d;
-        }
-
-        .hw-status.not-done {
-            background: #fdecee;
-            color: #b02a37;
-        }
-
-        .hw-status.pending {
-            background: #fff4d6;
-            color: #a06b00;
-        }
-
-        .grade-badge {
-            display: inline-block;
-            background: #e6f4ea;
-            color: #137a3d;
-            font-weight: 700;
-            border-radius: 4px;
-            padding: 1px 5px;
-            font-size: 11px;
-            margin-right: 2px;
-        }
-
-            .grade-badge.bad {
-                background: #fdecee;
-                color: #b02a37;
-            }
-
-        .att-badge {
-            display: inline-block;
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-size: 10px;
-            background: #eef3ff;
-            color: #2a5bd7;
-            align-self: flex-start;
-        }
-
-            .att-badge.absent {
-                background: #fdecee;
-                color: #c0392b;
-                font-weight: 600;
-            }
-
-        @media (max-width: 900px) {
-            .diary {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/css/shared.css">
+    <link rel="stylesheet" href="/css/diary.css">
+    <link rel="stylesheet" href="/css/journal.css">
+    <link rel="stylesheet" href="/css/analytics.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+            integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="brand"><div class="brand-logo">Д</div><div class="brand-text">Дневник</div></div>
+        <div class="brand"><div class="brand-logo">Д</div><div class="brand-text">Электронный дневник</div></div>
         <h4>Меню</h4>
-        <a href="#" class="active" data-tab="week"><span class="icon">🗓️</span><span>Дневник</span></a>
-        <a href="#" data-tab="grades"><span class="icon">📝</span><span>Оценки</span></a>
-        <a href="#" data-tab="homework"><span class="icon">📖</span><span>Домашние задания</span></a>
-        <a href="#" data-tab="attendance"><span class="icon">✅</span><span>Посещаемость</span></a>
+        <a href="#" class="active" data-tab="diary"><span class="icon">🗓️</span><span>Дневник</span></a>
+        <a href="#" data-tab="journal"><span class="icon">📓</span><span>Журнал</span></a>
+        <a href="#" data-tab="summary"><span class="icon">📋</span><span>Сводная ведомость</span></a>
         <a href="#" data-tab="analytics"><span class="icon">📈</span><span>Аналитика</span></a>
     </div>
 
@@ -216,60 +35,121 @@
                         <span class="role" id="userClass">—</span>
                     </div>
                 </div>
-                <button class="btn-logout" onclick="logout()">Выйти</button>
+                <button class="btn-secondary" onclick="logout()">Выйти</button>
             </div>
         </div>
 
         <div class="content-body">
-            <div class="tab-panel active" data-panel="week">
-                <h2>Дневник на неделю</h2>
-                <div class="week-nav">
-                    <button onclick="shiftWeek(-1)">← Предыдущая</button>
-                    <span class="range" id="weekRange">—</span>
-                    <button onclick="shiftWeek(1)">Следующая →</button>
-                    <button onclick="goToday()">Текущая</button>
+            <div class="tab-panel active" data-panel="diary">
+                <h2>Дневник</h2>
+                <div class="filters">
+                    <select id="dQuarter"></select>
+                    <div class="week-nav">
+                        <button id="dPrev" onclick="shiftWeek(-1)">← Предыдущая</button>
+                        <span class="range" id="weekRange">—</span>
+                        <button id="dNext" onclick="shiftWeek(1)">Следующая →</button>
+                        <button onclick="goToday()">Текущая</button>
+                    </div>
                 </div>
-                <div class="diary-wrap" id="diaryWrap"></div>
+                <div id="diaryWrap"><div class="empty-state">Загрузка...</div></div>
             </div>
 
-            <div class="tab-panel" data-panel="grades">
-                <h2>Мои оценки</h2>
-                <div class="table-container">
-                    <table>
-                        <thead><tr><th>Дата</th><th>Предмет</th><th>Оценка</th><th>Тип</th><th>Комментарий</th></tr></thead>
-                        <tbody id="gradesTable"></tbody>
-                    </table>
+            <div class="tab-panel" data-panel="journal">
+                <h2>Журнал оценок и посещаемости</h2>
+                <div class="filters">
+                    <select id="jSubject"></select>
+                    <select id="jQuarter"></select>
+                    <button class="btn-primary" onclick="loadJournal()">Обновить</button>
+                </div>
+                <div class="jtab-bar">
+                    <button class="jtab active" data-jtab="grades" onclick="switchJTab('grades')">📝 Оценки</button>
+                    <button class="jtab" data-jtab="hw" onclick="switchJTab('hw')">📚 Домашние задания</button>
+                </div>
+                <div id="jGradesView">
+                    <div class="journal-wrap" id="journalWrap"><div class="empty-state">Выберите предмет</div></div>
+                </div>
+                <div id="jHwView" style="display:none">
+                    <div id="hwListView"><div class="empty-state">Выберите предмет</div></div>
                 </div>
             </div>
 
-            <div class="tab-panel" data-panel="homework">
-                <h2>Домашние задания</h2>
-                <div class="table-container">
-                    <table>
-                        <thead><tr><th>Предмет</th><th>Выдано</th><th>Срок</th><th>Описание</th><th>Статус</th></tr></thead>
-                        <tbody id="hwTable"></tbody>
-                    </table>
+            <div class="tab-panel" data-panel="summary">
+                <h2>Сводная ведомость за четверть</h2>
+                <div class="filters">
+                    <select id="sQuarter"></select>
+                    <button class="btn-primary" onclick="loadSummaryTab()">Обновить</button>
                 </div>
-            </div>
-
-            <div class="tab-panel" data-panel="attendance">
-                <h2>Посещаемость</h2>
                 <div class="table-container">
-                    <table>
-                        <thead><tr><th>Дата</th><th>Предмет</th><th>Статус</th><th>Комментарий</th></tr></thead>
-                        <tbody id="attTable"></tbody>
+                    <table class="summary-table">
+                        <colgroup>
+                            <col style="width: 24%">
+                            <col style="width: 18%">
+                            <col style="width: 12%">
+                            <col style="width: 26%">
+                            <col style="width: 20%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Предмет</th>
+                                <th class="num">Ср. балл за четверть</th>
+                                <th class="num">Оценок</th>
+                                <th class="num">Посещаемость</th>
+                                <th class="num">Годовая</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryBody"></tbody>
                     </table>
                 </div>
             </div>
 
             <div class="tab-panel" data-panel="analytics">
-                <h2>Личная аналитика</h2>
-                <div class="stats-grid" id="anStats"></div>
-                <div class="table-container">
-                    <table>
-                        <thead><tr><th>Предмет (ID)</th><th>Средний балл</th><th>Кол-во оценок</th></tr></thead>
-                        <tbody id="anTable"></tbody>
-                    </table>
+                <div class="toolbar" style="margin-bottom: 16px;">
+                    <h2 style="margin-bottom: 0;">Аналитика успеваемости</h2>
+                    <button class="btn-primary" onclick="exportAnalyticsToPDF(this, 'analyticsPrintArea', 'analytics_parent.pdf')">
+                        🖨️ Вывод на печать / PDF
+                    </button>
+                </div>
+                <div class="filters">
+                    <select id="aQuarter"></select>
+                    <button class="btn-secondary" onclick="loadAnalytics()">Применить</button>
+                </div>
+                <div id="analyticsPrintArea" class="print-area">
+                    <div class="stats-grid" id="anStats"></div>
+                    <div class="analytics-row">
+                        <div class="analytics-card">
+                            <h3>📊 Средний балл по предметам</h3>
+                            <div id="anBar"></div>
+                        </div>
+                    </div>
+                    <div class="analytics-row">
+                        <div class="analytics-card">
+                            <h3>📈 Динамика успеваемости</h3>
+                            <div id="anDynamics"></div>
+                        </div>
+                    </div>
+                    <div class="analytics-row three-cols">
+                        <div class="analytics-card">
+                            <h3>Распределение отметок</h3>
+                            <div class="pie-wrap">
+                                <div id="anGradesPie"></div>
+                                <div id="anGradesLegend"></div>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Посещаемость</h3>
+                            <div class="pie-wrap">
+                                <div id="anAttPie"></div>
+                                <div id="anAttLegend"></div>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Выполнение ДЗ</h3>
+                            <div class="pie-wrap">
+                                <div id="anHwPie"></div>
+                                <div id="anHwLegend"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -277,179 +157,425 @@
 
     <div class="toast-container" id="toasts"></div>
 
+    <script src="/js/common.js"></script>
+    <script src="/js/charts.js"></script>
+    <script src="/js/pdf-export.js"></script>
     <script>
         const API = '/api/student';
-        function cleanToken(r) { return r ? String(r).replace(/^\uFEFF/, '').replace(/[\u200B-\u200D]/g, '').replace(/\s/g, '').trim() : ''; }
-        const token = cleanToken(localStorage.getItem('token'));
-        if (!token) { location.replace('/index.html'); throw new Error('No token'); }
-        const headers = { 'Authorization': 'Bearer ' + token };
+        const token = AppCommon.requireAuth();
+        if (!token) throw new Error('No token');
+        const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+        const api = AppCommon.makeApi(API, headers);
+
+        const { pad2, toDateOnly, parseLocalDate, fmtShort, fmtLong, getMonday,
+            escapeHtml, isAbsent, shortAtt, toast } = AppCommon;
+
         const userName = localStorage.getItem('userName') || 'Ученик';
         document.getElementById('userInfo').textContent = userName;
         document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
 
-        // Функция для получения первой учебной недели сентября 2026 года
-        function getInitialWeekStart() {
-            const targetDate = new Date(2026, 8, 1); // 1 сентября 2026 (месяцы с 0)
-            const dayOfWeek = targetDate.getDay();
-            // Если воскресенье (0), отнимаем 6 дней, иначе отнимаем (день недели - 1)
-            const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-            targetDate.setDate(targetDate.getDate() + diff);
-            return targetDate;
+        const BASE_WEEK = new Date(2026, 8, 7);
+        let quarters = [];
+        let weekStart = new Date(BASE_WEEK);
+        let currentQuarterId = null;
+        let currentJournalData = null;
+        let currentJTab = 'grades';
+
+        function getQuarter(id) { return quarters.find(q => q.id === Number(id)) || null; }
+        function pickDefaultQuarter() {
+            if (!quarters.length) return null;
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const cur = quarters.find(q => {
+                const s = parseLocalDate(q.dateStart), e = parseLocalDate(q.dateEnd);
+                return s <= today && today <= e;
+            });
+            if (cur) return cur;
+            const past = quarters.filter(q => parseLocalDate(q.dateEnd) < today)
+                .sort((a, b) => parseLocalDate(b.dateEnd) - parseLocalDate(a.dateEnd))[0];
+            if (past) return past;
+            return quarters.slice().sort((a, b) => parseLocalDate(a.dateStart) - parseLocalDate(b.dateStart))[0];
+        }
+        function quarterBounds(q) {
+            if (!q) return null;
+            return { minMon: getMonday(parseLocalDate(q.dateStart)), maxMon: getMonday(parseLocalDate(q.dateEnd)) };
+        }
+        function clampWeekToQuarter() {
+            const b = quarterBounds(getQuarter(currentQuarterId));
+            if (!b) return;
+            if (weekStart < b.minMon) weekStart = new Date(b.minMon);
+            if (weekStart > b.maxMon) weekStart = new Date(b.maxMon);
+            document.getElementById('dPrev').disabled = weekStart <= b.minMon;
+            document.getElementById('dNext').disabled = weekStart >= b.maxMon;
         }
 
-        let weekStart = getInitialWeekStart(), loggingOut = false;
-
-        async function api(path) {
-            const r = await fetch(API + path, { headers });
-            if (r.status === 401) { if (!loggingOut) { loggingOut = true; localStorage.clear(); location.replace('/index.html'); } throw new Error('Сессия истекла'); }
-            if (r.status === 403) throw new Error('Нет доступа');
-            if (!r.ok) throw new Error('Ошибка запроса');
-            return r.json();
+        function extractHomework(lesson) {
+            if (!lesson) return null;
+            if (lesson.homework) {
+                const h = lesson.homework;
+                return {
+                    id: h.id ?? h.homeworkId ?? null,
+                    description: h.description ?? h.text ?? h.content ?? '',
+                    status: h.status ?? h.homeworkStatus ?? '',
+                    dateIssued: h.dateIssued ?? h.homeworkDateIssued ?? null,
+                    dateDue: h.dateDue ?? h.homeworkDateDue ?? null,
+                    dateSubmitted: h.dateSubmitted ?? h.homeworkDateSubmitted ?? null
+                };
+            }
+            if (lesson.homeworkId || lesson.homeworkDescription) {
+                return {
+                    id: lesson.homeworkId ?? null,
+                    description: lesson.homeworkDescription ?? '',
+                    status: lesson.homeworkStatus ?? '',
+                    dateIssued: lesson.homeworkDateIssued ?? null,
+                    dateDue: lesson.homeworkDateDue ?? null,
+                    dateSubmitted: lesson.homeworkDateSubmitted ?? null
+                };
+            }
+            return null;
         }
-        function toast(m, t = 'success') { const e = document.createElement('div'); e.className = 'toast ' + t; e.textContent = m; document.getElementById('toasts').appendChild(e); setTimeout(() => e.remove(), 3500); }
-        function fmtDate(d) { return d ? new Date(d).toLocaleDateString('ru-RU') : '—'; }
-        function fmtShort(d) { return new Date(d).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }); }
-        function statusBadge(s) {
-            if (!s) return '<span class="badge gray">—</span>';
-            if (/выполн|done/i.test(s)) return `<span class="badge green">${s}</span>`;
-            if (/не сдан|просроч/i.test(s)) return `<span class="badge red">${s}</span>`;
-            return `<span class="badge yellow">${s}</span>`;
+        function hwStatusClass(s) {
+            s = String(s || '').toLowerCase();
+            if (/выполн|done|сдано|готово/.test(s)) return 'done';
+            if (/не сдан|просроч|невыполн|не выполн/.test(s)) return 'not-done';
+            return 'pending';
+        }
+        function hwStatusLabel(s) {
+            s = String(s || '').toLowerCase();
+            if (/выполн|done|сдано|готово/.test(s)) return 'Сдано';
+            if (/не сдан|просроч|невыполн|не выполн/.test(s)) return 'Не сдано';
+            return 'Не отмечено';
         }
 
         async function loadMe() {
             try {
                 const me = await api('/me');
                 if (me.className) document.getElementById('userClass').textContent = me.className;
-            } catch (e) { }
+            } catch { }
+        }
+
+        async function loadQuarters() {
+            quarters = await api('/quarters');
+            const opts = quarters.map(q => `<option value="${q.id}">${escapeHtml(q.fullName)}${q.isCurrent ? ' • текущая' : ''}</option>`).join('');
+            ['dQuarter', 'jQuarter', 'sQuarter', 'aQuarter'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = opts;
+            });
+            const def = pickDefaultQuarter();
+            if (def) {
+                currentQuarterId = def.id;
+                ['dQuarter', 'jQuarter', 'sQuarter', 'aQuarter'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = def.id;
+                });
+            }
+        }
+
+        async function loadSubjects() {
+            try {
+                const subjects = await api('/subjects');
+                document.getElementById('jSubject').innerHTML = subjects.map(s => `<option value="${s.subjectId}">${escapeHtml(s.name)}</option>`).join('') || '<option value="">Нет предметов</option>';
+            } catch (e) { toast(e.message, 'error'); }
         }
 
         async function loadWeek() {
             const wrap = document.getElementById('diaryWrap');
             wrap.innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка...</div>';
             try {
-                const qs = weekStart ? '?startDate=' + weekStart.toISOString() : '';
-                const data = await api('/week' + qs);
-                if (data.startDate) weekStart = new Date(data.startDate);
+                const params = new URLSearchParams({ startDate: toDateOnly(weekStart) });
+                if (currentQuarterId) params.set('quarterId', currentQuarterId);
+                const data = await api('/week?' + params.toString());
+                if (data.startDate) weekStart = parseLocalDate(data.startDate);
+                clampWeekToQuarter();
                 renderWeekRange(data.days);
                 renderWeek(data.days);
-            } catch (e) { wrap.innerHTML = `<div>${e.message}</div>`; }
+            } catch (e) { wrap.innerHTML = `<div class="empty-state">${escapeHtml(e.message)}</div>`; }
         }
 
         function renderWeekRange(days) {
-            if (!days || !days.length) { document.getElementById('weekRange').textContent = '—'; return; }
-            const a = new Date(days[0].date), b = new Date(days[days.length - 1].date);
-            document.getElementById('weekRange').textContent =
-                a.toLocaleDateString('ru-RU') + ' — ' + b.toLocaleDateString('ru-RU');
+            const el = document.getElementById('weekRange');
+            if (!days || !days.length) { el.textContent = '—'; return; }
+            const a = parseLocalDate(days[0].date), b = parseLocalDate(days[days.length - 1].date);
+            el.textContent = a.toLocaleDateString('ru-RU') + ' — ' + b.toLocaleDateString('ru-RU');
         }
 
         function renderWeek(days) {
             const wrap = document.getElementById('diaryWrap');
             if (!days || !days.length) { wrap.innerHTML = '<div class="empty-state">Нет расписания</div>'; return; }
-            const left = days.slice(0, 3);
-            const right = days.slice(3, 6);
-            wrap.innerHTML = `
-            <div class="diary">
-                <div class="diary-page">${left.map(renderDiaryDay).join('')}</div>
-                <div class="diary-page">${right.map(renderDiaryDay).join('')}</div>
-            </div>`;
+            const left = days.slice(0, 3), right = days.slice(3, 6);
+            wrap.innerHTML = `<div class="diary">
+                        <div class="diary-page">${left.map(renderDay).join('')}</div>
+                        <div class="diary-page">${right.map(renderDay).join('')}</div>
+                    </div>`;
         }
 
-        function renderDiaryDay(day) {
+        function renderDay(day) {
             const rows = [];
+            const lessonsArr = day.lessons || [];
             for (let i = 1; i <= 8; i++) {
-                const l = (day.lessons || []).find(x => x.lessonNumber === i);
-                if (l) {
-                    const gradeHtml = (l.grades && l.grades.length)
-                        ? l.grades.map(g => `<span class="grade-badge ${g.value <= 2 ? 'bad' : ''}">${g.value}</span>`).join(' ')
-                        : '';
-                    const attHtml = l.attendance
-                        ? `<span class="att-badge ${/отсут|^н$/i.test(l.attendance.status) ? 'absent' : ''}">${l.attendance.status}</span>`
-                        : '';
-                    let hwHtml = '';
-                    if (l.homework) {
-                        let cls = 'pending';
-                        if (/выполн|done/i.test(l.homework.status || '')) cls = 'done';
-                        else if (/не сдан|просроч/i.test(l.homework.status || '')) cls = 'not-done';
-                        hwHtml = `<div class="hw-text">${l.homework.description || ''}</div>`;
-                        if (l.homework.status) hwHtml += `<span class="hw-status ${cls}">${l.homework.status}</span>`;
+                const l = lessonsArr.find(x => x.lessonNumber === i);
+                if (!l) { rows.push(`<div class="lesson-row"><div class="num">${i}</div><div class="cell"></div><div class="cell"></div></div>`); continue; }
+                const hw = extractHomework(l);
+                let hwHtml;
+                if (hw) {
+                    const cls = hwStatusClass(hw.status);
+                    hwHtml = `<div class="hw-text" title="${escapeHtml(hw.description)}">${escapeHtml(hw.description || 'Без описания')}</div>`;
+                    if (hw.status) hwHtml += `<span class="hw-status ${cls}">${escapeHtml(hw.status)}</span>`;
+                    if (hw.id != null) {
+                        const ad = cls === 'done' ? 'active-done' : '';
+                        const an = cls === 'not-done' ? 'active-notdone' : '';
+                        hwHtml += `<div class="hw-btn-group">
+                                    <button class="hw-btn ${ad}" onclick="markHwWeek(${hw.id}, 'сдано', event)">✓ сдано</button>
+                                    <button class="hw-btn ${an}" onclick="markHwWeek(${hw.id}, 'просрочено', event)">✗ не сдано</button>
+                                </div>`;
                     }
-
-                    rows.push(`<div class="lesson-row">
-                    <div class="num">${i}</div>
-                    <div class="cell">
-                        <div class="subject">${l.subjectName || '—'}</div>
-                        <div class="teacher">${l.teacherName || ''}</div>
-                    </div>
-                    <div class="cell">${hwHtml}</div>
-                    <div class="cell">${gradeHtml}</div>
-                    <div class="cell">${attHtml}</div>
-                </div>`);
                 } else {
-                    rows.push(`<div class="lesson-row">
-                    <div class="num">${i}</div>
-                    <div class="cell"></div><div class="cell"></div>
-                    <div class="cell"></div><div class="cell"></div>
-                </div>`);
+                    hwHtml = `<div class="empty-hw">Нет ДЗ</div>`;
                 }
+                const cab = l.cabinet ? `<div class="cabinet">каб. ${escapeHtml(l.cabinet)}</div>` : '';
+                rows.push(`<div class="lesson-row">
+                            <div class="num">${i}</div>
+                            <div class="cell">
+                                <div class="subject" title="${escapeHtml(l.subjectName || '—')}">${escapeHtml(l.subjectName || '—')}</div>
+                                <div class="teacher" title="${escapeHtml(l.teacherName || '')}">${escapeHtml(l.teacherName || '')}</div>
+                                ${cab}
+                            </div>
+                            <div class="cell">${hwHtml}</div>
+                        </div>`);
             }
-            return `<div class="diary-day">
-            <div class="day-label">${day.dayName} · ${fmtShort(day.date)}</div>
-            <div class="lesson-rows">${rows.join('')}</div>
-        </div>`;
+            return `<div class="diary-day ${day.inQuarter ? '' : 'out-of-quarter'}">
+                        <div class="day-label">${escapeHtml(day.dayName)} · ${fmtShort(day.date)}</div>
+                        <div class="lesson-rows">${rows.join('')}</div>
+                    </div>`;
+        }
+
+        async function markHwWeek(homeworkId, status, event) {
+            if (event) { event.preventDefault(); event.stopPropagation(); }
+            try {
+                await api('/homework-statuses', {
+                    method: 'POST',
+                    body: JSON.stringify({ homeworkId: Number(homeworkId), status, dateSubmitted: toDateOnly(new Date()) })
+                });
+                toast(status === 'сдано' ? 'ДЗ отмечено как сданное' : 'ДЗ отмечено как не сданное');
+                await loadWeek();
+                if (currentJournalData) await loadJournal();
+            } catch (e) { toast(e.message, 'error'); }
         }
 
         function shiftWeek(delta) {
-            if (!weekStart) weekStart = new Date();
-            weekStart = new Date(weekStart.getTime() + delta * 7 * 86400000);
+            const b = quarterBounds(getQuarter(currentQuarterId));
+            let candidate = new Date(weekStart.getTime() + delta * 7 * 86400000);
+            if (b) {
+                if (candidate < b.minMon) candidate = new Date(b.minMon);
+                if (candidate > b.maxMon) candidate = new Date(b.maxMon);
+                if (candidate.getTime() === weekStart.getTime()) return;
+            }
+            weekStart = candidate;
             loadWeek();
         }
-        function goToday() { weekStart = new Date(); loadWeek(); }
+        function goToday() {
+            const b = quarterBounds(getQuarter(currentQuarterId));
+            let candidate = getMonday(new Date());
+            if (b) {
+                if (candidate < b.minMon) candidate = new Date(b.minMon);
+                if (candidate > b.maxMon) candidate = new Date(b.maxMon);
+            }
+            weekStart = candidate;
+            loadWeek();
+        }
 
-        async function loadGrades() {
-            const tb = document.getElementById('gradesTable');
-            tb.innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div>Загрузка...</div></td></tr>';
-            try {
-                const items = await api('/grades');
-                tb.innerHTML = items.map(g => `<tr><td>${fmtDate(g.date)}</td><td>${g.subject?.name || '—'}</td>
-                <td><strong>${g.value}</strong></td><td>${g.type || '—'}</td><td>${g.comment || '—'}</td></tr>`).join('')
-                    || '<tr><td colspan="5"><div class="empty-state">Оценок нет</div></td></tr>';
-            } catch (e) { tb.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`; }
+        function switchJTab(tab) {
+            currentJTab = tab;
+            document.querySelectorAll('.jtab').forEach(t => t.classList.toggle('active', t.dataset.jtab === tab));
+            document.getElementById('jGradesView').style.display = tab === 'grades' ? '' : 'none';
+            document.getElementById('jHwView').style.display = tab === 'hw' ? '' : 'none';
+            if (tab === 'hw') renderHwListView();
         }
-        async function loadHomework() {
-            const tb = document.getElementById('hwTable');
-            tb.innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div>Загрузка...</div></td></tr>';
+
+        async function loadJournal() {
+            const subjectId = Number(document.getElementById('jSubject').value);
+            const quarterId = Number(document.getElementById('jQuarter').value);
+            if (!subjectId || !quarterId) return;
+            currentQuarterId = quarterId;
+            const wrap = document.getElementById('journalWrap');
+            wrap.innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка...</div>';
             try {
-                const items = await api('/homework');
-                tb.innerHTML = items.map(h => `<tr><td>${h.subject}</td><td>${fmtDate(h.dateIssued)}</td>
-                <td>${fmtDate(h.dateDue)}</td><td>${h.description}</td><td>${statusBadge(h.status)}</td></tr>`).join('')
-                    || '<tr><td colspan="5"><div class="empty-state">Нет заданий</div></td></tr>';
-            } catch (e) { tb.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`; }
+                const data = await api(`/journal?subjectId=${subjectId}&quarterId=${quarterId}`);
+                currentJournalData = data;
+                renderJournal(data);
+                if (currentJTab === 'hw') renderHwListView();
+            } catch (e) {
+                wrap.innerHTML = `<div class="empty-state">${escapeHtml(e.message)}</div>`;
+                currentJournalData = null;
+                if (currentJTab === 'hw') renderHwListView();
+            }
         }
-        async function loadAttendance() {
-            const tb = document.getElementById('attTable');
-            tb.innerHTML = '<tr><td colspan="4"><div class="loading"><div class="spinner"></div>Загрузка...</div></td></tr>';
-            try {
-                const items = await api('/attendance');
-                tb.innerHTML = items.map(a => {
-                    const ok = a.status !== 'н' && a.status !== 'отсутствовал';
-                    return `<tr><td>${fmtDate(a.date)}</td><td>${a.subject?.name || '—'}</td>
-                    <td><span class="badge ${ok ? 'green' : 'red'}">${a.status}</span></td>
-                    <td>${a.comment || '—'}</td></tr>`;
-                }).join('') || '<tr><td colspan="4"><div class="empty-state">Записей нет</div></td></tr>';
-            } catch (e) { tb.innerHTML = `<tr><td colspan="4">${e.message}</td></tr>`; }
+
+        function renderJournal(data) {
+            const wrap = document.getElementById('journalWrap');
+            if (!data.dates || !data.dates.length) { wrap.innerHTML = '<div class="empty-state">Нет уроков в этой четверти</div>'; return; }
+            const totalLessons = data.dates.length;
+            const grades = data.cells.filter(c => c.grade != null).map(c => c.grade);
+            const avg = grades.length ? grades.reduce((a, b) => a + b, 0) / grades.length : null;
+            const avgStr = avg == null ? '—' : avg.toFixed(2);
+            const avgCls = avg == null ? 'sticky-right col-avg muted' : 'sticky-right col-avg';
+            const attended = data.cells.filter(c => !isAbsent(c.attendance)).length;
+            const attCls = attended === 0 ? 'sticky-right col-att absent-all' : 'sticky-right col-att';
+
+            let html = '<table class="journal"><thead><tr>';
+            html += '<th class="sticky-col">Предмет</th>';
+            data.dates.forEach(d => { html += `<th class="rotated"><span>${fmtShort(d)}</span></th>`; });
+            html += '<th class="sticky-right col-avg">Ср. балл</th>';
+            html += '<th class="sticky-right col-att">Посещ.</th>';
+            html += '</tr></thead><tbody><tr>';
+            html += `<td class="sticky-col" title="${escapeHtml(data.subjectName || '')}">${escapeHtml(data.subjectName || '')}</td>`;
+            data.cells.forEach(c => {
+                const gradeHtml = c.grade != null ? `<span class="g ${c.grade <= 3 ? 'bad' : ''}">${c.grade}</span>` : '';
+                let attHtml = '';
+                if (c.attendance && c.attendance !== 'присутствовал' && c.attendance !== 'присутствовала') {
+                    attHtml = `<span class="att ${isAbsent(c.attendance) ? 'absent' : ''}">${escapeHtml(shortAtt(c.attendance))}</span>`;
+                }
+                html += `<td>${gradeHtml}${attHtml}</td>`;
+            });
+            html += `<td class="${avgCls}">${avgStr}</td>`;
+            html += `<td class="${attCls}"><span>${attended}</span><span class="sep">/${totalLessons}</span></td>`;
+            html += '</tr></tbody></table>';
+            wrap.innerHTML = html;
         }
-        async function loadAnalytics() {
+
+        function collectHomeworkFromJournal(data) {
+            if (!data) return [];
+            const map = new Map();
+            (data.cells || []).forEach(c => {
+                const hwId = c.homeworkId;
+                if (hwId == null) return;
+                const key = String(hwId);
+                const existing = map.get(key);
+                const entry = {
+                    homeworkId: hwId,
+                    description: c.homeworkDescription || '',
+                    dateIssued: c.homeworkDateIssued || c.date || null,
+                    dateDue: c.homeworkDateDue || null,
+                    status: c.homeworkStatus || '',
+                    dateSubmitted: c.homeworkDateSubmitted || null
+                };
+                if (!existing || (entry.status && !existing.status)) map.set(key, entry);
+            });
+            return Array.from(map.values()).sort((a, b) => {
+                const da = a.dateIssued ? parseLocalDate(a.dateIssued) : null;
+                const db = b.dateIssued ? parseLocalDate(b.dateIssued) : null;
+                if (da && db) return da - db;
+                if (da) return -1;
+                if (db) return 1;
+                return 0;
+            });
+        }
+
+        function renderHwListView() {
+            const container = document.getElementById('hwListView');
+            if (!currentJournalData) { container.innerHTML = '<div class="empty-state">Сначала выберите предмет и нажмите «Обновить»</div>'; return; }
+            const items = collectHomeworkFromJournal(currentJournalData);
+            if (!items.length) { container.innerHTML = '<div class="empty-state">Нет домашних заданий по этому предмету в выбранной четверти</div>'; return; }
+            let html = '<table class="hw-list-table"><thead><tr>';
+            html += '<th style="width:120px">Дата выдачи</th>';
+            html += '<th>Задание</th>';
+            html += '<th style="width:120px">Срок сдачи</th>';
+            html += '<th style="width:130px">Статус</th>';
+            html += '<th style="width:230px">Действия</th>';
+            html += '</tr></thead><tbody>';
+            items.forEach(hw => {
+                const cls = hwStatusClass(hw.status);
+                const label = hwStatusLabel(hw.status);
+                const ad = cls === 'done' ? 'active-done' : '';
+                const an = cls === 'not-done' ? 'active-notdone' : '';
+                html += `<tr>
+                            <td>${hw.dateIssued ? escapeHtml(fmtLong(hw.dateIssued)) : '—'}</td>
+                            <td class="hw-desc">${escapeHtml(hw.description || 'Без описания')}</td>
+                            <td>${hw.dateDue ? escapeHtml(fmtLong(hw.dateDue)) : '—'}</td>
+                            <td><span class="hw-status-badge ${cls}">${label}</span></td>
+                            <td>
+                                <div class="hw-actions">
+                                    <button class="hw-action-btn ${ad}" onclick="markHwList(${hw.homeworkId}, 'сдано')">✓ Сдано</button>
+                                    <button class="hw-action-btn ${an}" onclick="markHwList(${hw.homeworkId}, 'просрочено')">✗ Не сдано</button>
+                                </div>
+                            </td>
+                        </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function markHwList(homeworkId, status) {
             try {
-                const d = await api('/analytics');
-                document.getElementById('anStats').innerHTML = `
-                <div class="stat-card green"><h3>Средний балл</h3><p>${Number(d.averageGrade || 0).toFixed(2)}</p></div>
-                <div class="stat-card blue"><h3>Посещаемость</h3><p>${Number(d.attendanceRate || 0).toFixed(0)}%</p></div>
-                <div class="stat-card yellow"><h3>Выполнение ДЗ</h3><p>${d.homeworkTotal ? Math.round(d.homeworkDone / d.homeworkTotal * 100) : 0}%</p></div>
-                <div class="stat-card red"><h3>Пропусков</h3><p>${d.absences ?? 0}</p></div>`;
-                document.getElementById('anTable').innerHTML = (d.bySubject || []).map(s =>
-                    `<tr><td>Предмет #${s.subjectId}</td><td>${Number(s.average || 0).toFixed(2)}</td><td>${s.count ?? 0}</td></tr>`).join('')
-                    || '<tr><td colspan="3"><div class="empty-state">Нет данных</div></td></tr>';
+                await api('/homework-statuses', {
+                    method: 'POST',
+                    body: JSON.stringify({ homeworkId: Number(homeworkId), status, dateSubmitted: toDateOnly(new Date()) })
+                });
+                toast(status === 'сдано' ? 'ДЗ отмечено как сданное' : 'ДЗ отмечено как не сданное');
+                await loadJournal();
+                await loadWeek();
             } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function avgClass(v) {
+            if (v == null) return '';
+            if (v >= 7) return 'good';
+            if (v >= 4.5) return 'mid';
+            return 'bad';
+        }
+
+        async function loadSummaryTab() {
+            const quarterId = Number(document.getElementById('sQuarter').value);
+            if (!quarterId) return;
+            const tb = document.getElementById('summaryBody');
+            tb.innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div>Загрузка...</div></td></tr>';
+            try {
+                const items = await api(`/summary?quarterId=${quarterId}`);
+                if (!items.length) { tb.innerHTML = '<tr><td colspan="5"><div class="empty-state">Нет данных</div></td></tr>'; return; }
+                tb.innerHTML = items.map(s => {
+                    const qAvg = s.quarterAvg != null ? s.quarterAvg.toFixed(2) : '—';
+                    const yAvg = s.yearAvg != null ? s.yearAvg.toFixed(2) : '—';
+                    const attStr = s.attendanceRate != null
+                        ? `${s.attendanceRate.toFixed(0)}%<span class="sub">(${s.attended}/${s.totalLessons})</span>`
+                        : '—';
+                    return `<tr>
+                                <td class="subject" title="${escapeHtml(s.subjectName)}">${escapeHtml(s.subjectName)}</td>
+                                <td class="num ${avgClass(s.quarterAvg)}">${qAvg}</td>
+                                <td class="num">${s.gradesCount}</td>
+                                <td class="num att-cell">${attStr}</td>
+                                <td class="num ${avgClass(s.yearAvg)}">${yAvg}</td>
+                            </tr>`;
+                }).join('');
+            } catch (e) { tb.innerHTML = `<tr><td colspan="5">${escapeHtml(e.message)}</td></tr>`; }
+        }
+
+        async function loadAnalytics() {
+            const quarterId = Number(document.getElementById('aQuarter').value) || null;
+            const statsEl = document.getElementById('anStats');
+            statsEl.innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка...</div>';
+            try {
+                const qs = quarterId ? `?quarterId=${quarterId}` : '';
+                const d = await api('/analytics' + qs);
+
+                statsEl.innerHTML = `
+                            <div class="stat-card green"><h3>Средний балл</h3><p>${Number(d.averageGrade || 0).toFixed(2)}</p></div>
+                            <div class="stat-card blue"><h3>Посещаемость</h3><p>${Number(d.attendanceRate || 0).toFixed(0)}%</p></div>
+                            <div class="stat-card yellow"><h3>Выполнение ДЗ</h3><p>${Number(d.homeworkCompletion || 0).toFixed(0)}%</p></div>
+                            <div class="stat-card red"><h3>Пропусков</h3><p>${d.absences ?? 0}</p></div>`;
+
+                document.getElementById('anBar').innerHTML = AppCharts.bar(d.bySubject || [], { max: 10 });
+                document.getElementById('anDynamics').innerHTML = AppCharts.line(d.monthlyDynamics || [], {
+                    max: 10, emptyMsg: 'Нет оценок за последние 6 месяцев'
+                });
+                document.getElementById('anGradesPie').innerHTML = AppCharts.pie(d.gradeDistribution || [], { size: 150 });
+                document.getElementById('anGradesLegend').innerHTML = AppCharts.legend(d.gradeDistribution || []);
+                document.getElementById('anAttPie').innerHTML = AppCharts.pie(d.attendanceDistribution || [], { size: 150 });
+                document.getElementById('anAttLegend').innerHTML = AppCharts.legend(d.attendanceDistribution || []);
+                document.getElementById('anHwPie').innerHTML = AppCharts.pie(d.homeworkDistribution || [], { size: 150 });
+                document.getElementById('anHwLegend').innerHTML = AppCharts.legend(d.homeworkDistribution || []);
+            } catch (e) {
+                statsEl.innerHTML = `<div class="empty-state">${escapeHtml(e.message)}</div>`;
+                toast(e.message, 'error');
+            }
         }
 
         document.querySelectorAll('.sidebar a[data-tab]').forEach(a => {
@@ -461,17 +587,33 @@
                 document.querySelector(`[data-panel="${a.dataset.tab}"]`).classList.add('active');
                 const t = a.dataset.tab;
                 document.getElementById('pageTitle').textContent = a.querySelector('span:not(.icon)').textContent;
-                if (t === 'week') loadWeek();
-                if (t === 'grades') loadGrades();
-                if (t === 'homework') loadHomework();
-                if (t === 'attendance') loadAttendance();
+                if (t === 'diary') loadWeek();
+                if (t === 'journal') loadJournal();
+                if (t === 'summary') loadSummaryTab();
                 if (t === 'analytics') loadAnalytics();
             });
         });
+
+        document.getElementById('dQuarter').onchange = () => {
+            currentQuarterId = Number(document.getElementById('dQuarter').value);
+            const b = quarterBounds(getQuarter(currentQuarterId));
+            if (b) weekStart = new Date(b.minMon);
+            loadWeek();
+        };
+        document.getElementById('jQuarter').onchange = loadJournal;
+        document.getElementById('jSubject').onchange = loadJournal;
+
         function logout() { localStorage.clear(); location.replace('/index.html'); }
 
-        loadMe();
-        loadWeek();
+        (async () => {
+            try {
+                await Promise.all([loadMe(), loadQuarters()]);
+                await loadSubjects();
+                const b = quarterBounds(getQuarter(currentQuarterId));
+                if (b) weekStart = new Date(b.minMon);
+                await loadWeek();
+            } catch (e) { toast(e.message, 'error'); }
+        })();
     </script>
 </body>
 </html>

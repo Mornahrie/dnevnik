@@ -25,21 +25,31 @@ public class ParentController : ControllerBase
     private async Task<Parent?> GetCurrentParentAsync()
     {
         var uid = GetUserId();
-        var p = await _context.Parents.FirstOrDefaultAsync(x => x.UserId == uid);
-        if (p == null) _logger.LogWarning("Профиль родителя не найден для UserId={UserId}", uid);
-        return p;
+        return await _context.Parents.FirstOrDefaultAsync(x => x.UserId == uid);
     }
 
     private async Task<bool> HasAccessToAsync(int parentId, int studentId)
     {
-        var ok = await _context.ParentStudents.AnyAsync(ps => ps.ParentId == parentId && ps.StudentId == studentId);
-        if (!ok)
-            _logger.LogWarning("Доступ запрещён: ParentId={ParentId} не связан со StudentId={StudentId}",
-                parentId, studentId);
-        return ok;
+        return await _context.ParentStudents.AnyAsync(ps =>
+            ps.ParentId == parentId && ps.StudentId == studentId);
     }
 
-    // ==================== ХЕЛПЕРЫ ДЛЯ ЧЕТВЕРТЕЙ ====================
+    private static DateTime ToDateTime(DateOnly d) => new DateTime(d.Year, d.Month, d.Day);
+    private static DateTime ToEndOfDay(DateOnly d) => new DateTime(d.Year, d.Month, d.Day, 23, 59, 59);
+
+    private static DateTime MondayOf(DateTime d)
+    {
+        var x = d.Date;
+        while (x.DayOfWeek != DayOfWeek.Monday) x = x.AddDays(-1);
+        return x;
+    }
+
+    private static bool IsAbsent(string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status)) return false;
+        var s = status.Trim().ToLower();
+        return s == "н" || s == "отсутствовал" || s == "отсутствовала";
+    }
 
     private async Task<Quarter?> GetQuarterForDateAsync(DateTime date)
     {
@@ -49,39 +59,6 @@ public class ParentController : ControllerBase
             .OrderBy(q => q.QuarterNumber)
             .FirstOrDefaultAsync();
     }
-
-    private async Task<Quarter?> GetCurrentQuarterAsync()
-    {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var current = await _context.Quarters
-            .Where(q => q.DateStart <= today && q.DateEnd >= today)
-            .OrderBy(q => q.QuarterNumber)
-            .FirstOrDefaultAsync();
-        if (current != null) return current;
-
-        return await _context.Quarters
-            .Where(q => q.DateStart <= today)
-            .OrderByDescending(q => q.DateStart)
-            .FirstOrDefaultAsync();
-    }
-
-    /// <summary>Если передан quarterId — берёт его границы, иначе возвращает переданные from/to.</summary>
-    private async Task<(DateTime? from, DateTime? to)> ResolveRangeAsync(int? quarterId,
-                                                                         DateTime? from, DateTime? to)
-    {
-        if (quarterId.HasValue)
-        {
-            var q = await _context.Quarters.FindAsync(quarterId.Value);
-            if (q != null)
-            {
-                from = new DateTime(q.DateStart.Year, q.DateStart.Month, q.DateStart.Day);
-                to = new DateTime(q.DateEnd.Year, q.DateEnd.Month, q.DateEnd.Day, 23, 59, 59);
-            }
-        }
-        return (from, to);
-    }
-
-    // ==================== ДЕТИ ====================
 
     [HttpGet("children")]
     public async Task<IActionResult> GetChildren()
@@ -103,11 +80,8 @@ public class ParentController : ControllerBase
             })
             .ToListAsync();
 
-        _logger.LogInformation("Родитель {ParentId}: получено {Count} детей", p.Id, children.Count);
         return Ok(children);
     }
-
-    // ==================== ЧЕТВЕРТИ ====================
 
     [HttpGet("quarters")]
     public async Task<IActionResult> GetQuarters()
@@ -132,300 +106,28 @@ public class ParentController : ControllerBase
         }));
     }
 
-    // ==================== ОЦЕНКИ ====================
-
-    [HttpGet("children/{studentId:int}/grades")]
-    public async Task<IActionResult> GetGrades(int studentId,
-                                               [FromQuery] DateTime? from,
-                                               [FromQuery] DateTime? to,
-                                               [FromQuery] int? quarterId)
-    {
-        var p = await GetCurrentParentAsync();
-        if (p == null) return NotFound();
-        if (!await HasAccessToAsync(p.Id, studentId)) return Forbid();
-
-        (from, to) = await ResolveRangeAsync(quarterId, from, to);
-
-        var q = _context.Grades
-            .Include(g => g.Subject)
-            .Include(g => g.Teacher).ThenInclude(t => t!.User)
-            .Where(g => g.StudentId == studentId);
-
-        if (from.HasValue) q = q.Where(g => g.Date >= from);
-        if (to.HasValue) q = q.Where(g => g.Date <= to);
-
-        var result = await q.OrderByDescending(g => g.Date).ToListAsync();
-        return Ok(result);
-    }
-
-    // ==================== ДОМАШНИЕ ЗАДАНИЯ ====================
-
-    [HttpGet("children/{studentId:int}/homework")]
-    public async Task<IActionResult> GetHomework(int studentId, [FromQuery] int? quarterId)
+    [HttpGet("children/{studentId:int}/subjects")]
+    public async Task<IActionResult> GetSubjects(int studentId)
     {
         var p = await GetCurrentParentAsync();
         if (p == null) return NotFound();
         if (!await HasAccessToAsync(p.Id, studentId)) return Forbid();
 
         var student = await _context.Students.FindAsync(studentId);
-        if (student == null) return NotFound();
+        if (student?.ClassId == null) return Ok(Array.Empty<object>());
 
-        var (from, to) = await ResolveRangeAsync(quarterId, null, null);
-
-        var hwQuery = _context.Homeworks
-            .Include(h => h.Subject)
-            .Where(h => h.ClassId == student.ClassId);
-
-        if (from.HasValue) hwQuery = hwQuery.Where(h => h.DateDue >= from);
-        if (to.HasValue) hwQuery = hwQuery.Where(h => h.DateIssued <= to);
-
-        var hw = await hwQuery
-            .OrderByDescending(h => h.DateIssued)
-            .Select(h => new
-            {
-                h.Id,
-                h.Description,
-                h.DateIssued,
-                h.DateDue,
-                Subject = h.Subject!.Name,
-                Status = h.HomeworkStatuses
-                    .Where(hs => hs.StudentId == studentId)
-                    .Select(hs => hs.Status)
-                    .FirstOrDefault(),
-                DateSubmitted = h.HomeworkStatuses
-                    .Where(hs => hs.StudentId == studentId)
-                    .Select(hs => hs.DateSubmitted)
-                    .FirstOrDefault()
-            })
-            .ToListAsync();
-
-        return Ok(hw);
-    }
-
-    // ==================== ПОСЕЩАЕМОСТЬ ====================
-
-    [HttpGet("children/{studentId:int}/attendance")]
-    public async Task<IActionResult> GetAttendance(int studentId,
-                                                   [FromQuery] DateTime? from,
-                                                   [FromQuery] DateTime? to,
-                                                   [FromQuery] int? quarterId)
-    {
-        var p = await GetCurrentParentAsync();
-        if (p == null) return NotFound();
-        if (!await HasAccessToAsync(p.Id, studentId)) return Forbid();
-
-        (from, to) = await ResolveRangeAsync(quarterId, from, to);
-
-        var q = _context.Attendances
-            .Include(a => a.Subject)
-            .Where(a => a.StudentId == studentId);
-
-        if (from.HasValue) q = q.Where(a => a.Date >= from);
-        if (to.HasValue) q = q.Where(a => a.Date <= to);
-
-        var result = await q.OrderByDescending(a => a.Date).ToListAsync();
-        return Ok(result);
-    }
-
-    // ==================== РАСПИСАНИЕ ====================
-
-    [HttpGet("children/{studentId:int}/schedule")]
-    public async Task<IActionResult> GetSchedule(int studentId, [FromQuery] int? quarterId)
-    {
-        var p = await GetCurrentParentAsync();
-        if (p == null) return NotFound();
-        if (!await HasAccessToAsync(p.Id, studentId)) return Forbid();
-
-        var student = await _context.Students.FindAsync(studentId);
-        if (student?.ClassId == null)
-            return Ok(new { quarter = (object?)null, lessons = Array.Empty<object>() });
-
-        Quarter? quarter = quarterId.HasValue
-            ? await _context.Quarters.FindAsync(quarterId.Value)
-            : await GetCurrentQuarterAsync();
-
-        if (quarter == null)
-            return Ok(new { quarter = (object?)null, lessons = Array.Empty<object>() });
-
-        var schedule = await _context.Schedules
-            .AsNoTracking()
+        var subjects = await _context.Schedules
+            .Where(sc => sc.ClassId == student.ClassId)
             .Include(sc => sc.Subject)
-            .Include(sc => sc.Teacher).ThenInclude(t => t!.User)
-            .Where(sc => sc.ClassId == student.ClassId && sc.QuarterId == quarter.Id)
-            .OrderBy(sc => sc.DayOfWeek)
-            .ThenBy(sc => sc.LessonNumber)
-            .Select(sc => new
-            {
-                sc.Id,
-                sc.DayOfWeek,
-                sc.LessonNumber,
-                sc.Cabinet,
-                SubjectId = sc.SubjectId,
-                SubjectName = sc.Subject != null ? sc.Subject.Name : null,
-                TeacherName = sc.Teacher != null && sc.Teacher.User != null
-                    ? sc.Teacher.User.FullName : null
-            })
+            .Select(sc => new { sc.SubjectId, Name = sc.Subject!.Name })
+            .Distinct()
             .ToListAsync();
 
-        return Ok(new
-        {
-            quarter = new
-            {
-                quarter.Id,
-                quarter.AcademicYear,
-                quarter.QuarterNumber,
-                quarter.DateStart,
-                quarter.DateEnd,
-                Name = $"{quarter.QuarterNumber}-я четверть",
-                YearLabel = $"{quarter.AcademicYear}/{quarter.AcademicYear + 1}"
-            },
-            lessons = schedule
-        });
+        return Ok(subjects);
     }
-
-    // ==================== АНАЛИТИКА ====================
-
-    [HttpGet("children/{studentId:int}/analytics")]
-    public async Task<IActionResult> Analytics(int studentId,
-                                               [FromQuery] DateTime? from,
-                                               [FromQuery] DateTime? to,
-                                               [FromQuery] int? quarterId)
-    {
-        var p = await GetCurrentParentAsync();
-        if (p == null) return NotFound();
-        if (!await HasAccessToAsync(p.Id, studentId)) return Forbid();
-
-        (from, to) = await ResolveRangeAsync(quarterId, from, to);
-
-        var gradesQ = _context.Grades.Where(g => g.StudentId == studentId);
-        var attQ = _context.Attendances.Where(a => a.StudentId == studentId);
-        var hwQ = _context.HomeworkStatuses.Where(h => h.StudentId == studentId);
-
-        if (from.HasValue)
-        {
-            gradesQ = gradesQ.Where(g => g.Date >= from);
-            attQ = attQ.Where(a => a.Date >= from);
-        }
-        if (to.HasValue)
-        {
-            gradesQ = gradesQ.Where(g => g.Date <= to);
-            attQ = attQ.Where(a => a.Date <= to);
-        }
-
-        var grades = await gradesQ.ToListAsync();
-        var attendance = await attQ.ToListAsync();
-        var hwStatuses = await hwQ.ToListAsync();
-
-        var student = await _context.Students.FindAsync(studentId);
-        double classAvg = 0;
-        if (student?.ClassId != null)
-        {
-            var classGradesQ = _context.Grades.Where(g => g.Student!.ClassId == student.ClassId);
-            if (from.HasValue) classGradesQ = classGradesQ.Where(g => g.Date >= from);
-            if (to.HasValue) classGradesQ = classGradesQ.Where(g => g.Date <= to);
-
-            var classGrades = await classGradesQ.ToListAsync();
-            if (classGrades.Any()) classAvg = classGrades.Average(g => g.Value);
-        }
-
-        var myAvg = grades.Any() ? grades.Average(g => g.Value) : 0;
-
-        var bySubject = grades
-            .GroupBy(g => g.SubjectId)
-            .Select(g => new
-            {
-                SubjectId = g.Key,
-                Average = g.Average(x => x.Value),
-                Count = g.Count()
-            })
-            .ToList();
-
-        return Ok(new
-        {
-            averageGrade = myAvg,
-            classAverage = classAvg,
-            deviation = myAvg - classAvg,
-            attendanceRate = attendance.Any()
-                ? (double)attendance.Count(a => a.Status != "н" && a.Status != "отсутствовал") / attendance.Count * 100
-                : 100,
-            absences = attendance.Count(a => a.Status == "н" || a.Status == "отсутствовал"),
-            homeworkTotal = hwStatuses.Count,
-            homeworkDone = hwStatuses.Count(h => h.Status == "выполнено" || h.Status == "done"),
-            bySubject
-        });
-    }
-
-    // ==================== УВЕДОМЛЕНИЯ ====================
-
-    [HttpGet("children/{studentId:int}/notifications")]
-    public async Task<IActionResult> GetNotifications(int studentId)
-    {
-        var p = await GetCurrentParentAsync();
-        if (p == null) return NotFound();
-        if (!await HasAccessToAsync(p.Id, studentId)) return Forbid();
-
-        var notifications = new List<object>();
-
-        var recentGrades = await _context.Grades
-            .Include(g => g.Subject)
-            .Where(g => g.StudentId == studentId && g.Date >= DateTime.UtcNow.AddDays(-7))
-            .OrderByDescending(g => g.Date)
-            .ToListAsync();
-
-        foreach (var g in recentGrades)
-        {
-            notifications.Add(new
-            {
-                Type = "grade",
-                Message = $"Новая оценка по {g.Subject?.Name}: {g.Value}",
-                Date = g.Date
-            });
-        }
-
-        var recentAbsences = await _context.Attendances
-            .Include(a => a.Subject)
-            .Where(a => a.StudentId == studentId
-                     && a.Date >= DateTime.UtcNow.AddDays(-7)
-                     && (a.Status == "н" || a.Status == "отсутствовал"))
-            .ToListAsync();
-
-        foreach (var a in recentAbsences)
-        {
-            notifications.Add(new
-            {
-                Type = "absence",
-                Message = $"Пропуск по {a.Subject?.Name}",
-                Date = a.Date
-            });
-        }
-
-        var missedHw = await _context.Homeworks
-            .Include(h => h.Subject)
-            .Where(h => h.ClassId == _context.Students
-                .Where(s => s.Id == studentId)
-                .Select(s => s.ClassId).FirstOrDefault()
-                && h.DateDue < DateTime.UtcNow
-                && !h.HomeworkStatuses.Any(hs => hs.StudentId == studentId
-                    && (hs.Status == "выполнено" || hs.Status == "done")))
-            .ToListAsync();
-
-        foreach (var h in missedHw)
-        {
-            notifications.Add(new
-            {
-                Type = "homework",
-                Message = $"Не сдано ДЗ по {h.Subject?.Name}",
-                Date = h.DateDue
-            });
-        }
-
-        return Ok(notifications);
-    }
-
-    // ==================== НЕДЕЛЯ ====================
 
     [HttpGet("children/{studentId:int}/week")]
-    public async Task<IActionResult> GetWeek(int studentId, [FromQuery] DateTime? startDate)
+    public async Task<IActionResult> GetWeek(int studentId, [FromQuery] DateTime? startDate, [FromQuery] int? quarterId)
     {
         var p = await GetCurrentParentAsync();
         if (p == null) return NotFound();
@@ -433,95 +135,406 @@ public class ParentController : ControllerBase
 
         var student = await _context.Students.FindAsync(studentId);
         if (student?.ClassId == null)
-            return Ok(new { startDate = DateTime.UtcNow, days = Array.Empty<object>() });
+            return Ok(new { startDate = DateTime.UtcNow, days = Array.Empty<object>(), quarterId = (int?)null });
 
-        var baseDate = (startDate ?? DateTime.UtcNow).Date;
-        while (baseDate.DayOfWeek != DayOfWeek.Monday) baseDate = baseDate.AddDays(-1);
+        Quarter? quarter = null;
+        if (quarterId.HasValue)
+            quarter = await _context.Quarters.FindAsync(quarterId.Value);
+        if (quarter == null)
+            quarter = await GetQuarterForDateAsync(startDate ?? DateTime.UtcNow);
+
+        if (quarter == null)
+            return Ok(new { startDate = DateTime.UtcNow, days = Array.Empty<object>(), quarterId = (int?)null });
+
+        var minMon = MondayOf(ToDateTime(quarter.DateStart));
+        var maxMon = MondayOf(ToDateTime(quarter.DateEnd));
+
+        var baseDate = MondayOf(startDate ?? minMon);
+        if (baseDate < minMon) baseDate = minMon;
+        if (baseDate > maxMon) baseDate = maxMon;
+
+        return Ok(await BuildWeekAsync(studentId, student.ClassId.Value, baseDate, quarter));
+    }
+
+    private async Task<object> BuildWeekAsync(int studentId, int classId, DateTime baseDate, Quarter quarter)
+    {
         var toExclusive = baseDate.AddDays(7);
+        var dayNames = new[] { "", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота" };
 
-        // четверть, покрывающая начало недели
-        var quarter = await GetQuarterForDateAsync(baseDate);
-
-        var dayNames = new[] { "", "Понедельник", "Вторник", "Среда",
-                             "Четверг", "Пятница", "Суббота" };
-
-        var schedules = quarter == null
-            ? new List<Schedule>()
-            : await _context.Schedules
-                .Include(sc => sc.Subject).Include(sc => sc.Teacher).ThenInclude(t => t!.User)
-                .Where(sc => sc.ClassId == student.ClassId && sc.QuarterId == quarter.Id)
-                .ToListAsync();
+        var schedules = await _context.Schedules
+            .Include(sc => sc.Subject).Include(sc => sc.Teacher).ThenInclude(t => t!.User)
+            .Where(sc => sc.ClassId == classId && sc.QuarterId == quarter.Id)
+            .ToListAsync();
 
         var homeworks = await _context.Homeworks
-            .Where(h => h.ClassId == student.ClassId
+            .Where(h => h.ClassId == classId
                      && ((h.DateIssued >= baseDate && h.DateIssued < toExclusive) ||
                          (h.DateDue >= baseDate && h.DateDue < toExclusive)))
             .ToListAsync();
         var hwIds = homeworks.Select(h => h.Id).ToList();
 
         var hwStatuses = await _context.HomeworkStatuses
-            .Where(hs => hs.StudentId == studentId && hwIds.Contains(hs.HomeworkId ?? 0)).ToListAsync();
+            .Where(hs => hs.StudentId == studentId && hwIds.Contains(hs.HomeworkId ?? 0))
+            .ToListAsync();
 
         var grades = await _context.Grades
-            .Where(g => g.StudentId == studentId
-                     && g.Date >= baseDate && g.Date < toExclusive).ToListAsync();
+            .Where(g => g.StudentId == studentId && g.Date >= baseDate && g.Date < toExclusive)
+            .ToListAsync();
 
         var atts = await _context.Attendances
-            .Where(a => a.StudentId == studentId
-                     && a.Date >= baseDate && a.Date < toExclusive).ToListAsync();
+            .Where(a => a.StudentId == studentId && a.Date >= baseDate && a.Date < toExclusive)
+            .ToListAsync();
+
+        var qStart = ToDateTime(quarter.DateStart);
+        var qEnd = ToDateTime(quarter.DateEnd);
 
         var days = new List<object>();
         for (int i = 0; i < 6; i++)
         {
             var date = baseDate.AddDays(i);
             var dow = i + 1;
-            var daySchedules = schedules.Where(sc => sc.DayOfWeek == dow)
-                .OrderBy(sc => sc.LessonNumber).ToList();
+            bool inQuarter = date >= qStart && date <= qEnd;
 
             var lessons = new List<object>();
-            foreach (var sc in daySchedules)
+            if (inQuarter)
             {
-                var hw = homeworks.FirstOrDefault(h => h.SubjectId == sc.SubjectId
-                    && (h.DateIssued.Date == date || h.DateDue.Date == date));
+                var daySchedules = schedules
+                    .Where(sc => sc.DayOfWeek == dow)
+                    .OrderBy(sc => sc.LessonNumber)
+                    .ToList();
 
-                HomeworkStatus? hwStatus = null;
-                if (hw != null)
-                    hwStatus = hwStatuses.FirstOrDefault(x => x.HomeworkId == hw.Id);
-
-                var att = atts.FirstOrDefault(a => a.SubjectId == sc.SubjectId && a.Date.Date == date);
-                var lessonGrades = grades
-                    .Where(g => g.SubjectId == sc.SubjectId && g.Date.Date == date)
-                    .Select(g => new { g.Value, g.Type, g.Comment }).ToList();
-
-                lessons.Add(new
+                foreach (var sc in daySchedules)
                 {
-                    lessonNumber = sc.LessonNumber,
-                    subjectId = sc.SubjectId,
-                    subjectName = sc.Subject?.Name,
-                    teacherName = sc.Teacher?.User?.FullName,
-                    cabinet = sc.Cabinet,
-                    homework = hw == null ? null : new
+                    var hw = homeworks.FirstOrDefault(h => h.SubjectId == sc.SubjectId
+                        && (h.DateIssued.Date == date || h.DateDue.Date == date));
+
+                    HomeworkStatus? hwStatus = null;
+                    if (hw != null)
+                        hwStatus = hwStatuses.FirstOrDefault(x => x.HomeworkId == hw.Id);
+
+                    var att = atts.FirstOrDefault(a => a.SubjectId == sc.SubjectId && a.Date.Date == date);
+                    var lessonGrades = grades
+                        .Where(g => g.SubjectId == sc.SubjectId && g.Date.Date == date)
+                        .Select(g => new { g.Value, g.Type, g.Comment })
+                        .ToList();
+
+                    lessons.Add(new
                     {
-                        id = hw.Id,
-                        description = hw.Description,
-                        dateIssued = hw.DateIssued,
-                        dateDue = hw.DateDue,
-                        status = hwStatus?.Status,
-                        dateSubmitted = hwStatus?.DateSubmitted
-                    },
-                    attendance = att == null ? null : new { status = att.Status, comment = att.Comment },
-                    grades = lessonGrades
-                });
+                        lessonNumber = sc.LessonNumber,
+                        subjectId = sc.SubjectId,
+                        subjectName = sc.Subject?.Name,
+                        teacherName = sc.Teacher?.User?.FullName,
+                        cabinet = sc.Cabinet,
+                        homework = hw == null ? null : new
+                        {
+                            id = hw.Id,
+                            description = hw.Description,
+                            dateIssued = hw.DateIssued,
+                            dateDue = hw.DateDue,
+                            status = hwStatus?.Status,
+                            dateSubmitted = hwStatus?.DateSubmitted
+                        },
+                        attendance = att == null ? null : new { status = att.Status, comment = att.Comment },
+                        grades = lessonGrades
+                    });
+                }
             }
-            days.Add(new { date, dayOfWeek = dow, dayName = dayNames[dow], lessons });
+            days.Add(new { date, dayOfWeek = dow, dayName = dayNames[dow], lessons, inQuarter });
+        }
+
+        return new
+        {
+            startDate = baseDate,
+            quarterId = quarter.Id,
+            quarterName = $"{quarter.QuarterNumber}-я четверть",
+            quarterStart = quarter.DateStart,
+            quarterEnd = quarter.DateEnd,
+            days
+        };
+    }
+
+    [HttpGet("children/{studentId:int}/journal")]
+    public async Task<IActionResult> GetJournal(int studentId, [FromQuery] int subjectId, [FromQuery] int quarterId)
+    {
+        var p = await GetCurrentParentAsync();
+        if (p == null) return NotFound();
+        if (!await HasAccessToAsync(p.Id, studentId)) return Forbid();
+
+        var student = await _context.Students.FindAsync(studentId);
+        if (student?.ClassId == null)
+            return Ok(new { dates = Array.Empty<object>(), cells = Array.Empty<object>(), subjectName = "" });
+
+        var quarter = await _context.Quarters.FindAsync(quarterId);
+        if (quarter == null)
+            return Ok(new { dates = Array.Empty<object>(), cells = Array.Empty<object>(), subjectName = "" });
+
+        var fromDate = ToDateTime(quarter.DateStart);
+        var toDate = ToDateTime(quarter.DateEnd);
+        var toExclusive = toDate.AddDays(1);
+
+        var weekdays = await _context.Schedules
+            .Where(sc => sc.ClassId == student.ClassId && sc.SubjectId == subjectId && sc.QuarterId == quarterId)
+            .Select(sc => sc.DayOfWeek)
+            .Distinct()
+            .ToListAsync();
+
+        var dates = new List<DateTime>();
+        for (var d = fromDate; d <= toDate; d = d.AddDays(1))
+        {
+            if (d.DayOfWeek == DayOfWeek.Sunday) continue;
+            if (weekdays.Contains((int)d.DayOfWeek)) dates.Add(d);
+        }
+
+        var grades = await _context.Grades
+            .Where(g => g.StudentId == studentId && g.SubjectId == subjectId
+                     && g.Date >= fromDate && g.Date < toExclusive)
+            .ToListAsync();
+
+        var atts = await _context.Attendances
+            .Where(a => a.StudentId == studentId && a.SubjectId == subjectId
+                     && a.Date >= fromDate && a.Date < toExclusive)
+            .ToListAsync();
+
+        var cells = dates.Select(dt =>
+        {
+            var g = grades.FirstOrDefault(x => x.Date.Date == dt);
+            var a = atts.FirstOrDefault(x => x.Date.Date == dt);
+            return new
+            {
+                date = dt,
+                gradeId = g?.Id,
+                grade = g == null ? (int?)null : g.Value,
+                gradeType = g?.Type,
+                gradeComment = g?.Comment,
+                attendanceId = a?.Id,
+                attendance = a?.Status,
+                attendanceComment = a?.Comment
+            };
+        }).ToList();
+
+        var subjectName = await _context.Subjects
+            .Where(x => x.Id == subjectId)
+            .Select(x => x.Name)
+            .FirstOrDefaultAsync();
+
+        return Ok(new
+        {
+            subjectId,
+            subjectName,
+            quarterId = quarter.Id,
+            quarterName = $"{quarter.QuarterNumber}-я четверть",
+            quarterStart = quarter.DateStart,
+            quarterEnd = quarter.DateEnd,
+            dates,
+            cells
+        });
+    }
+
+    [HttpGet("children/{studentId:int}/summary")]
+    public async Task<IActionResult> GetSummary(int studentId, [FromQuery] int quarterId)
+    {
+        var p = await GetCurrentParentAsync();
+        if (p == null) return NotFound();
+        if (!await HasAccessToAsync(p.Id, studentId)) return Forbid();
+
+        var student = await _context.Students.FindAsync(studentId);
+        if (student?.ClassId == null) return Ok(Array.Empty<object>());
+
+        var quarter = await _context.Quarters.FindAsync(quarterId);
+        if (quarter == null) return Ok(Array.Empty<object>());
+
+        var fromDate = ToDateTime(quarter.DateStart);
+        var toDate = ToDateTime(quarter.DateEnd);
+        var toExclusive = toDate.AddDays(1);
+
+        var yearStart = ToDateTime(new DateOnly(quarter.AcademicYear, 9, 1));
+        var yearEnd = ToDateTime(new DateOnly(quarter.AcademicYear + 1, 6, 30));
+
+        var subjects = await _context.Schedules
+            .Where(sc => sc.ClassId == student.ClassId)
+            .Include(sc => sc.Subject)
+            .Select(sc => new { sc.SubjectId, Name = sc.Subject!.Name })
+            .Distinct()
+            .ToListAsync();
+
+        var result = new List<object>();
+
+        foreach (var subj in subjects)
+        {
+            if (subj.SubjectId == null) continue;
+
+            var weekdays = await _context.Schedules
+                .Where(sc => sc.ClassId == student.ClassId && sc.SubjectId == subj.SubjectId && sc.QuarterId == quarterId)
+                .Select(sc => sc.DayOfWeek)
+                .Distinct()
+                .ToListAsync();
+
+            int lessonsCount = 0;
+            for (var d = fromDate; d <= toDate; d = d.AddDays(1))
+            {
+                if (d.DayOfWeek == DayOfWeek.Sunday) continue;
+                if (weekdays.Contains((int)d.DayOfWeek)) lessonsCount++;
+            }
+
+            var grades = await _context.Grades
+                .Where(g => g.StudentId == studentId && g.SubjectId == subj.SubjectId
+                         && g.Date >= fromDate && g.Date < toExclusive)
+                .ToListAsync();
+
+            var atts = await _context.Attendances
+                .Where(a => a.StudentId == studentId && a.SubjectId == subj.SubjectId
+                         && a.Date >= fromDate && a.Date < toExclusive)
+                .ToListAsync();
+
+            var avgQ = grades.Any() ? Math.Round(grades.Average(g => g.Value), 2) : (double?)null;
+            var attended = atts.Count(a => !IsAbsent(a.Status));
+            var totalAtt = lessonsCount > 0 ? lessonsCount : atts.Count;
+            var attRate = totalAtt > 0 ? Math.Round((double)attended / totalAtt * 100, 0) : (double?)null;
+
+            var yearGrades = await _context.Grades
+                .Where(g => g.StudentId == studentId && g.SubjectId == subj.SubjectId
+                         && g.Date >= yearStart && g.Date <= yearEnd)
+                .ToListAsync();
+            var yearAvg = yearGrades.Any() ? Math.Round(yearGrades.Average(g => g.Value), 2) : (double?)null;
+
+            result.Add(new
+            {
+                subjectId = subj.SubjectId,
+                subjectName = subj.Name,
+                quarterAvg = avgQ,
+                gradesCount = grades.Count,
+                attendanceRate = attRate,
+                attended,
+                totalLessons = totalAtt,
+                yearAvg
+            });
+        }
+
+        return Ok(result);
+    }
+
+    [HttpGet("children/{studentId:int}/analytics")]
+    public async Task<IActionResult> Analytics(int studentId, [FromQuery] int? quarterId)
+    {
+        var p = await GetCurrentParentAsync();
+        if (p == null) return NotFound();
+        if (!await HasAccessToAsync(p.Id, studentId)) return Forbid();
+
+        var s = await _context.Students.FindAsync(studentId);
+        if (s == null) return NotFound();
+
+        DateTime? from = null, to = null;
+        if (quarterId.HasValue)
+        {
+            var q = await _context.Quarters.FindAsync(quarterId.Value);
+            if (q != null)
+            {
+                from = ToDateTime(q.DateStart);
+                to = ToEndOfDay(q.DateEnd);
+            }
+        }
+
+        var gradesQ = _context.Grades.Where(g => g.StudentId == studentId);
+        var attQ = _context.Attendances.Where(a => a.StudentId == studentId);
+
+        if (from.HasValue) { gradesQ = gradesQ.Where(g => g.Date >= from); attQ = attQ.Where(a => a.Date >= from); }
+        if (to.HasValue) { gradesQ = gradesQ.Where(g => g.Date <= to); attQ = attQ.Where(a => a.Date <= to); }
+
+        var grades = await gradesQ.ToListAsync();
+        var attendance = await attQ.ToListAsync();
+
+        var hwQuery = _context.Homeworks.Where(h => h.ClassId == s.ClassId);
+        if (from.HasValue) hwQuery = hwQuery.Where(h => h.DateIssued >= from);
+        if (to.HasValue) hwQuery = hwQuery.Where(h => h.DateIssued <= to);
+        var hwIds = await hwQuery.Select(h => h.Id).ToListAsync();
+
+        var hwStatuses = await _context.HomeworkStatuses
+            .Where(hs => hs.StudentId == studentId && hwIds.Contains(hs.HomeworkId ?? 0))
+            .ToListAsync();
+
+        var doneHw = hwStatuses.Count(hs =>
+        {
+            var st = (hs.Status ?? "").Trim().ToLower();
+            return st == "выполнено" || st == "сдано" || st == "готово" || st == "done";
+        });
+
+        var subjectNames = await _context.Subjects.ToDictionaryAsync(x => x.Id, x => x.Name);
+
+        var bySubject = grades
+            .GroupBy(g => g.SubjectId)
+            .Select(g => new
+            {
+                subjectId = g.Key,
+                subjectName = g.Key.HasValue && subjectNames.ContainsKey(g.Key.Value) ? subjectNames[g.Key.Value] : "",
+                average = Math.Round(g.Average(x => x.Value), 2),
+                count = g.Count()
+            })
+            .OrderBy(x => x.subjectName)
+            .ToList();
+
+        var gradeDistribution = new[]
+        {
+            new { label = "9–10", count = grades.Count(g => g.Value >= 9), color = "#137a3d" },
+            new { label = "7–8",  count = grades.Count(g => g.Value >= 7 && g.Value <= 8), color = "#4a90e2" },
+            new { label = "4–6",  count = grades.Count(g => g.Value >= 4 && g.Value <= 6), color = "#f5a623" },
+            new { label = "1–3",  count = grades.Count(g => g.Value >= 1 && g.Value <= 3), color = "#d0021b" }
+        };
+
+        int present = 0, absent = 0, valid = 0;
+        foreach (var a in attendance)
+        {
+            var st = (a.Status ?? "").Trim().ToLower();
+            if (st == "н" || st == "отсутствовал" || st == "отсутствовала") absent++;
+            else if (st == "уважительная") valid++;
+            else present++;
+        }
+
+        var attDist = new[]
+        {
+            new { label = "Присутствовал", count = present, color = "#4a90e2" },
+            new { label = "Отсутствовал",  count = absent,  color = "#d0021b" },
+            new { label = "Уважительная",  count = valid,   color = "#f5a623" }
+        };
+
+        var hwDist = new[]
+        {
+            new { label = "Сдано",     count = doneHw,                color = "#4a90e2" },
+            new { label = "Не сдано",  count = hwIds.Count - doneHw,  color = "#d0021b" }
+        };
+
+        var monthsRu = new[] { "Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                               "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек" };
+        var now = DateTime.UtcNow;
+        var dynamics = new List<object>();
+        for (int i = 5; i >= 0; i--)
+        {
+            var m = new DateTime(now.Year, now.Month, 1).AddMonths(-i);
+            var next = m.AddMonths(1);
+            var mg = grades.Where(g => g.Date >= m && g.Date < next).ToList();
+            dynamics.Add(new
+            {
+                label = monthsRu[m.Month - 1],
+                average = mg.Any() ? Math.Round(mg.Average(g => g.Value), 2) : 0,
+                count = mg.Count
+            });
         }
 
         return Ok(new
         {
-            startDate = baseDate,
-            quarterId = quarter?.Id,
-            quarterName = quarter == null ? null : $"{quarter.QuarterNumber}-я четверть",
-            days
+            averageGrade = grades.Any() ? Math.Round(grades.Average(g => g.Value), 2) : 0,
+            totalGrades = grades.Count,
+            attendanceRate = attendance.Any()
+                ? Math.Round((double)(attendance.Count - absent) / attendance.Count * 100, 1)
+                : 100.0,
+            homeworkCompletion = hwIds.Count > 0
+                ? Math.Round((double)doneHw / hwIds.Count * 100, 0)
+                : 0,
+            absences = absent,
+            bySubject,
+            gradeDistribution,
+            attendanceDistribution = attDist,
+            homeworkDistribution = hwDist,
+            monthlyDynamics = dynamics
         });
     }
 }

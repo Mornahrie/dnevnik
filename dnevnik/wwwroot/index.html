@@ -19,25 +19,15 @@
         <div id="error-message" class="error-msg"></div>
     </div>
 
+    <script src="/js/common.js"></script>
     <script>
         const btn = document.getElementById('loginBtn');
         const errorDiv = document.getElementById('error-message');
 
         function pick(obj, ...keys) {
             if (!obj) return undefined;
-            for (const k of keys) {
-                if (obj[k] !== undefined && obj[k] !== null) return obj[k];
-            }
+            for (const k of keys) if (obj[k] !== undefined && obj[k] !== null) return obj[k];
             return undefined;
-        }
-
-        function cleanToken(raw) {
-            if (!raw) return '';
-            return String(raw)
-                .replace(/^\uFEFF/, '')
-                .replace(/[\u200B-\u200D]/g, '')
-                .replace(/\s/g, '')
-                .trim();
         }
 
         async function login() {
@@ -45,7 +35,6 @@
             const passwordInput = document.getElementById('password').value;
 
             errorDiv.textContent = '';
-
             if (!loginInput || !passwordInput) {
                 errorDiv.textContent = 'Пожалуйста, заполните все поля';
                 return;
@@ -68,32 +57,23 @@
                 }
 
                 const data = await response.json();
-                console.log('RAW RESPONSE:', data);
-
                 const rawToken = pick(data, 'token', 'Token');
                 const name = pick(data, 'name', 'Name') || '';
                 const role = pick(data, 'role', 'Role') || '';
                 const url = pick(data, 'redirectUrl', 'RedirectUrl');
 
-                const token = cleanToken(rawToken);
+                const token = AppCommon.cleanToken(rawToken);
 
                 if (!token || !url) {
                     errorDiv.textContent = 'Сервер вернул неполный ответ';
-                    console.error('Incomplete response:', data);
                     return;
                 }
-
-                console.log('TOKEN len =', token.length,
-                    'first char code =', token.charCodeAt(0),
-                    'last char code =', token.charCodeAt(token.length - 1),
-                    'header =', token.split('.')[0]);
 
                 try {
                     localStorage.setItem('token', token);
                     localStorage.setItem('userName', name);
                     localStorage.setItem('userRole', role);
-                } catch (err) {
-                    console.error('localStorage недоступен:', err);
+                } catch {
                     errorDiv.textContent = 'Браузер блокирует сохранение сессии';
                     return;
                 }
@@ -114,13 +94,8 @@
         }
 
         btn.addEventListener('click', login);
-
-        document.getElementById('password').addEventListener('keypress', e => {
-            if (e.key === 'Enter') login();
-        });
-        document.getElementById('login').addEventListener('keypress', e => {
-            if (e.key === 'Enter') document.getElementById('password').focus();
-        });
+        document.getElementById('password').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+        document.getElementById('login').addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('password').focus(); });
     </script>
 </body>
 </html>

@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "services": [
+    {
+      "name": "dnevnik-backend",
+      "runtime": "container",
+      "src": "Dockerfile"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
+}

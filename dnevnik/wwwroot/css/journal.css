@@ -1,0 +1,187 @@
+﻿.journal-wrap {
+    overflow: auto;
+    max-height: 75vh;
+    border: 1px solid #e5ebf2;
+    border-radius: 12px;
+    background: #fff;
+}
+
+table.journal {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+    width: 100%;
+    table-layout: auto;
+}
+
+    table.journal th, table.journal td {
+        border-right: 1px solid #eef2f7;
+        border-bottom: 1px solid #eef2f7;
+        padding: 4px 6px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    table.journal thead th {
+        background: #f6f9ff;
+        color: #334;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+        table.journal thead th.rotated {
+            height: 92px;
+            width: 30px;
+            min-width: 30px;
+            vertical-align: bottom;
+            padding: 4px 2px;
+        }
+
+            table.journal thead th.rotated > span {
+                writing-mode: vertical-rl;
+                transform: rotate(180deg);
+                display: inline-block;
+                white-space: nowrap;
+                font-size: 11px;
+            }
+
+    table.journal .sticky-col {
+        position: sticky;
+        left: 0;
+        background: #fff;
+        text-align: left;
+        min-width: 180px;
+        max-width: 220px;
+        width: 180px;
+        z-index: 1;
+        font-weight: 600;
+        color: #1c2b46;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    table.journal thead .sticky-col {
+        background: #f6f9ff;
+        z-index: 3;
+        vertical-align: middle;
+    }
+
+    table.journal .sticky-right {
+        position: sticky;
+        background: #fff;
+        z-index: 1;
+        white-space: nowrap;
+        text-align: center;
+        font-weight: 700;
+        font-size: 12px;
+    }
+
+    table.journal thead .sticky-right {
+        background: #f6f9ff;
+        z-index: 3;
+        font-weight: 600;
+        font-size: 11px;
+        color: #334;
+        vertical-align: middle;
+    }
+
+    table.journal .col-avg {
+        right: 72px;
+        min-width: 72px;
+        width: 72px;
+        color: #137a3d;
+        border-left: 1px solid #e5ebf2;
+    }
+
+        table.journal .col-avg.muted {
+            color: #b0b9c6;
+            font-weight: 500;
+        }
+
+    table.journal .col-att {
+        right: 0;
+        min-width: 80px;
+        width: 80px;
+        color: #2a5bd7;
+        border-left: 1px solid #e5ebf2;
+    }
+
+        table.journal .col-att .sep {
+            color: #b0b9c6;
+            font-weight: 400;
+        }
+
+        table.journal .col-att.absent-all {
+            color: #c0392b;
+        }
+
+    table.journal .g {
+        display: inline-block;
+        font-weight: 700;
+        color: #137a3d;
+        background: #e6f4ea;
+        border-radius: 4px;
+        padding: 0 5px;
+        font-size: 12px;
+        min-width: 20px;
+    }
+
+        table.journal .g.bad {
+            color: #b02a37;
+            background: #fdecee;
+        }
+
+    table.journal .att {
+        display: block;
+        font-size: 9px;
+        color: #849;
+        margin-top: 1px;
+    }
+
+        table.journal .att.absent {
+            color: #c0392b;
+            font-weight: 600;
+        }
+
+    table.journal td.cell {
+        cursor: pointer;
+        transition: background .12s, box-shadow .12s;
+        position: relative;
+    }
+
+        table.journal td.cell:hover {
+            background: #eaf3ff;
+            box-shadow: inset 0 0 0 2px #a8ccf5;
+        }
+
+        table.journal td.cell.has-data:hover {
+            background: #fff6df;
+            box-shadow: inset 0 0 0 2px #f0c46b;
+        }
+
+        table.journal td.cell .hw-dot {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: block;
+            box-shadow: 0 0 0 1px #fff;
+            pointer-events: none;
+        }
+
+            table.journal td.cell .hw-dot.pending {
+                background: #f5a623;
+            }
+
+            table.journal td.cell .hw-dot.done {
+                background: #137a3d;
+            }
+
+            table.journal td.cell .hw-dot.not-done {
+                background: #d0021b;
+            }

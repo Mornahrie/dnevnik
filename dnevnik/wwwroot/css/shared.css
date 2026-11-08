@@ -1,0 +1,485 @@
+﻿/* ============ Layout ============ */
+html, body {
+    min-height: 100vh;
+    margin: 0;
+}
+
+body {
+    display: block !important;
+    min-height: 100vh;
+}
+
+.sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 240px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    align-self: auto !important;
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 100 !important;
+}
+
+.main-content {
+    margin-left: 240px !important;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+@media (max-width: 860px) {
+    .sidebar {
+        width: 68px !important;
+    }
+
+    .main-content {
+        margin-left: 68px !important;
+    }
+}
+
+/* ============ Filters ============ */
+.filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+    .filters > * {
+        flex-shrink: 0;
+    }
+
+    .filters select, .filters input {
+        height: 38px;
+        box-sizing: border-box;
+        padding: 0 10px;
+        border: 1px solid #d6dee8;
+        border-radius: 8px;
+        background: #fff;
+        font-size: 13px;
+        color: #334;
+        line-height: 36px;
+        vertical-align: middle;
+    }
+
+    .filters button, .filters .btn-primary, .filters .btn-secondary {
+        height: 38px;
+        min-height: 38px;
+        max-height: 38px;
+        padding: 0 18px;
+        margin: 0;
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 8px;
+        transform: none;
+        box-shadow: none;
+        cursor: pointer;
+    }
+
+    .filters .btn-primary {
+        background: #4a90e2;
+        color: #fff;
+        border: 1px solid #4a90e2;
+    }
+
+        .filters .btn-primary:hover {
+            background: #357abd;
+            border-color: #357abd;
+        }
+
+    .filters .btn-secondary {
+        background: #fff;
+        color: #334;
+        border: 1px solid #d6dee8;
+    }
+
+        .filters .btn-secondary:hover {
+            color: #4a90e2;
+            border-color: #4a90e2;
+        }
+
+/* ============ Week navigation ============ */
+.week-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: #fff;
+    border: 1px solid #d6dee8;
+    border-radius: 8px;
+    padding: 2px;
+    height: 38px;
+    box-sizing: border-box;
+}
+
+    .week-nav button {
+        border: none;
+        background: transparent;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #334;
+        height: 100%;
+        display: inline-flex;
+        align-items: center;
+    }
+
+        .week-nav button:hover:not(:disabled) {
+            background: #eef2f7;
+        }
+
+        .week-nav button:disabled {
+            color: #b0b9c6;
+            cursor: not-allowed;
+        }
+
+    .week-nav .range {
+        font-weight: 600;
+        min-width: 200px;
+        text-align: center;
+        color: #334;
+        padding: 0 10px;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+/* ============ Tabs ============ */
+.tab-panel {
+    display: none;
+}
+
+    .tab-panel.active {
+        display: block;
+    }
+
+/* ============ Buttons ============ */
+.btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding: 0 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s, border-color .15s;
+    box-sizing: border-box;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: #4a90e2;
+    border: 1px solid #4a90e2;
+    color: #fff;
+}
+
+    .btn-primary:hover {
+        background: #357abd;
+        border-color: #357abd;
+    }
+
+.btn-secondary {
+    background: #fff;
+    border: 1px solid #d6dee8;
+    color: #334;
+}
+
+    .btn-secondary:hover {
+        background: #f4f7fb;
+        border-color: #c8d4e0;
+    }
+
+.btn-sm {
+    height: 30px;
+    padding: 0 12px;
+    font-size: 12px;
+}
+
+/* ============ Loading / empty ============ */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 30px;
+    color: #667;
+    font-size: 13px;
+}
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d6dee8;
+    border-top-color: #4a90e2;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 30px 10px;
+    color: #889;
+    font-size: 13px;
+}
+
+/* ============ Toasts ============ */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.toast {
+    padding: 12px 18px;
+    border-radius: 8px;
+    background: #2d3748;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
+    animation: slideIn .2s ease-out;
+    pointer-events: auto;
+    max-width: 360px;
+}
+
+    .toast.success {
+        background: #137a3d;
+    }
+
+    .toast.error {
+        background: #b02a37;
+    }
+
+    .toast.warning {
+        background: #a06b00;
+    }
+
+@keyframes slideIn {
+    from {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ============ Modal ============ */
+body > .modal-overlay.modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(20,30,50,.5) !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    padding: 20px !important;
+    backdrop-filter: blur(3px);
+    overflow: hidden !important;
+}
+
+    body > .modal-overlay.modal-overlay.active {
+        display: flex !important;
+    }
+
+body > .modal-overlay > .modal.modal {
+    background: #fff !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+    max-width: 560px !important;
+    max-height: calc(100vh - 40px) !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2) !important;
+    overflow: hidden !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+}
+
+body > .modal-overlay > .modal > .modal-header {
+    padding: 16px 20px !important;
+    border-bottom: 1px solid #eef2f7 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    background: #fff !important;
+}
+
+    body > .modal-overlay > .modal > .modal-header h3 {
+        margin: 0 !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        color: #1c2b46 !important;
+    }
+
+    body > .modal-overlay > .modal > .modal-header .modal-close {
+        background: transparent !important;
+        border: none !important;
+        font-size: 22px !important;
+        color: #889 !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 6px !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+    }
+
+        body > .modal-overlay > .modal > .modal-header .modal-close:hover {
+            background: #f0f4f8 !important;
+            color: #334 !important;
+        }
+
+body > .modal-overlay > .modal > .modal-body {
+    padding: 20px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    flex: 1 1 auto !important;
+    background: #fff !important;
+    min-height: 0 !important;
+}
+
+body > .modal-overlay > .modal > .modal-footer {
+    padding: 14px 20px !important;
+    border-top: 1px solid #eef2f7 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: #fafbfc !important;
+    flex: 0 0 auto !important;
+    min-height: 68px !important;
+    margin: 0 !important;
+}
+
+    body > .modal-overlay > .modal > .modal-footer > .btn-primary,
+    body > .modal-overlay > .modal > .modal-footer > .btn-secondary {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 40px !important;
+        line-height: 1 !important;
+        padding: 0 22px !important;
+        margin: 0 !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        cursor: pointer !important;
+        box-sizing: border-box !important;
+        white-space: nowrap !important;
+    }
+
+    body > .modal-overlay > .modal > .modal-footer > .btn-primary {
+        background: #4a90e2 !important;
+        border: 1px solid #4a90e2 !important;
+        color: #fff !important;
+    }
+
+        body > .modal-overlay > .modal > .modal-footer > .btn-primary:hover {
+            background: #357abd !important;
+            border-color: #357abd !important;
+        }
+
+    body > .modal-overlay > .modal > .modal-footer > .btn-secondary {
+        background: #fff !important;
+        border: 1px solid #d6dee8 !important;
+        color: #334 !important;
+    }
+
+        body > .modal-overlay > .modal > .modal-footer > .btn-secondary:hover {
+            background: #f4f7fb !important;
+            border-color: #c8d4e0 !important;
+        }
+
+/* ============ Form groups ============ */
+.form-group {
+    margin-bottom: 14px;
+}
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #334;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        padding: 9px 12px;
+        border: 1px solid #d6dee8;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: inherit;
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+        background: #fff;
+        box-sizing: border-box;
+        color: #1c2b46;
+    }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74,144,226,.12);
+        }
+
+/* ============ Print area ============ */
+.print-area {
+    background: #fff;
+    padding: 10px;
+    border-radius: 14px;
+}
+
+@media print {
+    .sidebar, .header, .filters, .toolbar {
+        display: none !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+    }
+
+    .tab-panel {
+        display: block !important;
+    }
+}
